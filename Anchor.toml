@@ -9,6 +9,9 @@ skip-lint = false
 [programs.localnet]
 tonari = "2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA"
 
+[programs.devnet]
+tonari = "2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA"
+
 [provider]
 cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
