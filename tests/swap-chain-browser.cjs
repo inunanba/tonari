@@ -1,0 +1,29 @@
+/** Requires serve-chain on 4173 and a real local validator; zero simulated finality. */
+const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright'),assert=require('node:assert/strict');
+(async()=>{
+ // A finalized local show takes several slots to create. Bounded readiness loop.
+ let ready=false;for(let i=0;i<90;i++){try{if((await fetch('http://127.0.0.1:4173/api/tonari/config')).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,1000));}assert(ready,'LOCAL_RELAY_NOT_READY');
+ const opts={headless:true,args:['--no-sandbox']};if(process.env.TONARI_CHROME_PATH)opts.executablePath=process.env.TONARI_CHROME_PATH;else opts.channel='chrome';const browser=await chromium.launch(opts);
+ try{
+  const context=await browser.newContext({viewport:{width:390,height:844}}),pages=await Promise.all([context.newPage(),context.newPage(),context.newPage()]),errors=[],external=[];
+  for(const p of pages){p.on('pageerror',e=>errors.push(e.message));p.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4173/'))external.push(r.url());});}
+  await Promise.all(pages.map((p,i)=>p.goto('http://127.0.0.1:4173/apps/web/swap.html?client='+i)));
+  for(const p of pages)await p.waitForFunction(()=>document.documentElement.dataset.chainReady==='true'&&document.documentElement.dataset.offlineReady==='true',null,{timeout:180000});
+  const [a,b,c]=pages,keys=await Promise.all(pages.map(p=>p.locator('#key').innerText()));assert.equal(new Set(keys).size,3);
+  for(const p of pages){await p.locator('#refresh').click();await p.waitForFunction(()=>document.querySelector('#want').options.length===6);}
+  const png=async p=>Buffer.from((await p.locator('#qr').evaluate(c=>c.toDataURL('image/png'))).split(',')[1],'base64'),upload=async(p,bytes)=>p.locator('#image').setInputFiles({name:'tonari-v2.png',mimeType:'image/png',buffer:bytes});
+  await a.locator('#want').selectOption('01'.repeat(32));await context.setOffline(true);
+  await upload(a,await png(b));await a.getByText('② 相手の確認を待つ').waitFor();const offer=await png(a);await upload(c,offer);await c.getByText('この端末宛ての交換ではありません。',{exact:false}).waitFor();
+  await upload(b,offer);await b.locator('#review').waitFor({state:'visible'});assert.match(await b.locator('#terms').innerText(),/所有権 0/);
+  await Promise.all([a.reload(),b.reload()]);await b.locator('#review').waitFor({state:'visible'});await a.getByText('② 保存した交換を続ける').waitFor();
+  await b.locator('#confirm').click();await b.getByText('③ 仮受け取りを保存しました ✓').waitFor();await upload(a,await png(b));await a.getByText('③ 仮受け取りを保存しました ✓').waitFor();
+  await a.locator('#settle').click();await a.getByText('仮受け取りは保存されています。',{exact:false}).waitFor();assert.equal(await a.locator('html').getAttribute('data-swap-state'),'provisional');
+  await Promise.all([a.reload(),b.reload()]);for(const p of [a,b])await p.getByText('③ 仮受け取りを保存しました ✓').waitFor();
+  await context.setOffline(false);for(const p of [a,b])await p.getByText('④ 交換が確定しました ✓').waitFor({timeout:180000});
+  const txs=await Promise.all([a,b].map(p=>p.locator('#transaction').innerText()));assert.equal(txs[0],txs[1]);
+  await context.setOffline(true);await Promise.all([a.reload(),b.reload()]);for(const p of [a,b])await p.getByText('④ 交換が確定しました ✓').waitFor();assert.deepEqual(await Promise.all(pages.map(p=>p.locator('#key').innerText())),keys);
+  const counts=await Promise.all(pages.map((p,i)=>p.evaluate(async i=>{const {DeviceStore}=await import('/packages/protocol/storage.mjs');const root=await DeviceStore.open('phone-'+i),s=root.exchange,config=await s.config(),rows=await s.receipts(config);root.close();return rows.length;},i)));assert.deepEqual(counts,[1,1,0]);assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+  await a.screenshot({path:'docs/v2-local-confirmed.png',fullPage:true,animations:'disabled',timeout:120000});
+  console.log(JSON.stringify({status:'PASS',v2_qr:true,offline_signed_exchange:true,pending_reload:true,offline_retry_preserves_provisional:true,real_local_finalized:true,same_transaction_for_both_devices:true,confirmed_offline_reload:true,third_device_unchanged:true,page_errors:errors,external_requests:external.length,cluster:'localnet',devnet:false}));
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

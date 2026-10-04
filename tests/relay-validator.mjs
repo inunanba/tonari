@@ -1,0 +1,21 @@
+/** Real localhost validator integration, not a mock RPC or public transaction. */
+import assert from 'node:assert/strict';
+import {createLocalRelay,tileId,joinMessage} from '../tools/local-relay.mjs';
+import {createDevice,hex} from '../packages/protocol/swap.mjs';
+import {signOffer,acceptOffer} from '../packages/protocol/swap-v2.mjs';
+import {verifyAttestation} from '../packages/protocol/attestation.mjs';
+let loseResponse=true;
+const relay=await createLocalRelay(process.env.TONARI_LOCAL_RPC||'http://127.0.0.1:18999',{onSubmitted:()=>{if(loseResponse){loseResponse=false;throw Error('INJECTED_LOST_RESPONSE_AFTER_FINALIZED');}}});
+const devices=await Promise.all([0,1,2].map(()=>createDevice())),results=[];
+const join=async(i,device=devices[i])=>relay.join({client:i,publicKey:device.publicKey,proof:hex(new Uint8Array(await crypto.subtle.sign('Ed25519',device.privateKey,joinMessage(relay.config,i,device.publicKey))))});
+for(let i=0;i<3;i++)await join(i);
+await join(0);await assert.rejects(()=>join(0,devices[1]),/CLIENT_ALREADY_BOUND/);results.push('three independent device proofs; repeat join idempotent; slot takeover rejected');
+const before=await verifyAttestation(await relay.state(),relay.config),at=before.observedAt;
+const o={show:relay.config.show,policy:relay.config.policy,a:devices[0].publicKey,b:devices[1].publicKey,tileA:hex(tileId(0)),tileB:hex(tileId(1)),nonce:hex(crypto.getRandomValues(new Uint8Array(16))),versionA:0,versionB:0,issuedAt:at,expiresAt:at+120,settleBy:before.deadline,reserved:0};
+const signed=await signOffer(devices[0],o),packet=await acceptOffer(devices[1],signed,{...relay.config,now:at});
+await assert.rejects(()=>relay.settle({packet:hex(packet)}),/INJECTED_LOST_RESPONSE_AFTER_FINALIZED/);results.push('actual finalized transaction with injected lost response');
+const envelope=await relay.settle({packet:hex(packet)}),receipt=await verifyAttestation(envelope,relay.config);assert.equal(receipt.kind,'settled');assert.equal(receipt.commitment,'finalized');
+assert.deepEqual(await relay.settle({packet:hex(packet)}),envelope);results.push('nonce and pair markers recover exact transaction; repeated retries return same signature');
+const after=await verifyAttestation(await relay.state(),relay.config),a=after.tiles.find(t=>t.id===o.tileA),b=after.tiles.find(t=>t.id===o.tileB);assert.equal(a.owner,devices[1].publicKey);assert.equal(b.owner,devices[0].publicKey);assert.equal(a.version,1);assert.equal(b.version,1);
+assert.deepEqual(after.tiles.filter(t=>![o.tileA,o.tileB].includes(t.id)),before.tiles.filter(t=>![o.tileA,o.tileB].includes(t.id)));results.push('actual chain ownership versions changed exactly once; seven unrelated tiles unchanged');
+console.log(JSON.stringify({status:'LOCAL_RELAY_VALIDATOR_PASS',checks:results,signature:receipt.signature,slot:receipt.slot,cluster:'localnet',realPublicChain:false,spend:0},null,2));

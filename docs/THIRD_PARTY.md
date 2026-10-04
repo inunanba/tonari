@@ -18,6 +18,7 @@ Future Anchor/Agave/Metaplex libraries must record pinned versions and licenses 
 | Component | Pin | License | Usage |
 |---|---|---|---|
 | @solana/web3.js |1.98.4|MIT|Node-only development client and local harness; never imported by PWA|
+| fake-indexeddb |6.2.4|Apache-2.0|Node-only storage migration/atomicity tests; never imported by PWA|
 | anchor-lang |0.32.1|Apache-2.0|Account constraints and program macros; full transitive versions/checksums in Cargo.lock|
 | solana-sha256-hasher |2.3.0|Apache-2.0|Native hash / SBF SHA256 syscall binding|
 | solana-sdk-ids |2.2.1|Apache-2.0|Canonical native program ids|

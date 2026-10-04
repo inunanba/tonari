@@ -1,6 +1,6 @@
 {
   "name": "tonari",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,10 +9,13 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "demo": "node tools/serve.mjs",
-    "test:chain": "node tests/chain-validator.cjs"
+    "test:chain": "node tests/chain-validator.cjs",
+    "demo:chain": "node tools/serve-chain.mjs",
+    "test:relay": "node tests/relay-validator.mjs"
   },
   "license": "MIT",
   "devDependencies": {
-    "@solana/web3.js": "1.98.4"
+    "@solana/web3.js": "1.98.4",
+    "fake-indexeddb": "6.2.4"
   }
 }
