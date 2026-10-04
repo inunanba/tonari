@@ -12,7 +12,7 @@ let store,device,sent=null,pending=null,busy=false,done=false;
 const camera=new CameraReader($('#video'));const error=e=>{$('#status').textContent='確認できませんでした：'+e.message;};
 function draw(text,label) {const r=qrRaster(text),c=$('#qr');c.hidden=false;c.width=r.width;c.height=r.height;c.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);$('#qr-label').textContent=label;}
 function showOffer(o){$('#pick').hidden=true;$('#review').hidden=false;$('#terms').textContent='あなたのピース '+(number(o.tileB)+1)+' を渡し、相手のピース '+(number(o.tileA)+1)+' を仮受け取りします。';$('#phase').textContent='② 内容を確かめる';$('#status').textContent='同意したときだけ、交換の約束に署名します。';}
-function completed(r){done=true;camera.stop();$('#reader').hidden=true;$('#pick').hidden=true;$('#review').hidden=true;$('#scan').disabled=true;$('#phase').textContent='③ 仮受け取りを保存しました ✓';$('#status').textContent='双方の署名を確認しました。確定処理は、通信が戻ってからつなぐ予定です。';
+function completed(r){document.querySelector("tonari-guide").setAttribute("state","swap");done=true;camera.stop();$('#reader').hidden=true;$('#pick').hidden=true;$('#review').hidden=true;$('#scan').disabled=true;$('#phase').textContent='③ 仮受け取りを保存しました ✓';$('#status').textContent='双方の署名を確認しました。確定処理は、通信が戻ってからつなぐ予定です。';
  if(r.offer.b===device.publicKey)draw(encodeWire('R',fromHex(r.packet,320)),'相手にこのQRを読んでもらい、交換結果を返してください。');
  else{$('#qr').hidden=true;$('#qr-label').textContent='交換の約束を、この端末に保存しました。';}
 }

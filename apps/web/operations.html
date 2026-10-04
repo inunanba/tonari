@@ -1,9 +1,9 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TONARI — 配布を確かめる</title><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./operations.css"></head><body><main class="stage">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TONARI — 配布を確かめる</title><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./operations.css"><link rel="stylesheet" href="./kawaii.css"></head><body><main class="stage">
 <header class="masthead"><a class="brand" href="./index.html">TONARI<span>となり</span></a><span class="badge">運営デモ · 入力は模擬データ</span></header>
 <h1>にぎわいに、<br><em>余白</em>を残す。</h1><p class="lede">混雑した場所では、レアピースの配布を止める。<br>再開はゆっくり、次の配布期間から。</p>
-<p class="notice">計算ルールを試すモデルです。実会場の観測値・混雑改善の実績ではありません。</p>
+<tonari-guide state="waiting" compact></tonari-guide><p class="notice">計算ルールを試すモデルです。実会場の観測値・混雑改善の実績ではありません。</p>
 <section class="controls"><button id="busy">G21を混雑させる</button><button id="quiet">G21を空いている状態に戻す</button><button id="step">30秒進める</button><button id="window">次の配布期間に進む</button><label>配布の強さ <input id="nudge" type="range" min="0" max="8" step="0.5" value="2"><output id="nudge-value">2</output></label><label><input id="induced" type="checkbox">G21へTONARIが10分間で8人を誘導したと仮定</label><label><input id="early" type="checkbox">序盤の配布量を増やす（90分で通常量へ）</label></section>
 <p id="governor" class="fine"></p><p id="status" role="status">準備中</p><p id="elapsed" class="fine"></p><section id="checkpoints" class="checkpoints" aria-label="8か所の配布判断"></section>
 <section class="notes"><div><h3>空いていても、急に集めない</h3><p>配布を増やすときはゆっくり。混み始めたときは素早く減らします。候補へ戻すのは、次の配布期間からです。</p></div><div><h3>記録から計算を確かめる</h3><p>入力と計算結果を保存できます。模擬データの記録であり、センサーや会場の状態が正しいことを証明するものではありません。</p><button id="download">この計算記録を保存する</button></div></section>
 <p id="offline-status" class="fine">通信なしで開く準備をしています。</p><footer>レア配布・候補表示の計算のみ。参加者の行動、配布実績、入場整理、全体の確定処理は未接続です。</footer>
-</main><script type="module" src="./operations.mjs"></script></body></html>
+</main><script type="module" src="./operations.mjs"></script><script type="module" src="./mascots.mjs"></script></body></html>

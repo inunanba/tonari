@@ -18,7 +18,7 @@ const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright');const asse
    await upload(b,offer);await b.locator('#review').waitFor({state:'visible'});assert.match(await b.locator('#terms').innerText(),/あなたのピース 2.*相手のピース 1/);
    // Both sides can reopen after an offer but before explicit recipient consent.
    await Promise.all([a.reload(),b.reload()]);await b.locator('#review').waitFor({state:'visible'});await a.getByText('② 保存した交換を続ける').waitFor();
-   await b.locator('#confirm').click();await b.getByText('③ 仮受け取りを保存しました ✓').waitFor();
+   await b.locator('#confirm').click();await b.getByText('③ 仮受け取りを保存しました ✓').waitFor();assert.equal(await b.locator('tonari-guide').getAttribute('data-guide-state'),'swap');
    await upload(a,await png(b));await a.getByText('③ 仮受け取りを保存しました ✓').waitFor();
    await Promise.all([a.reload(),b.reload()]);for(const p of [a,b])await p.getByText('③ 仮受け取りを保存しました ✓').waitFor();
    assert.deepEqual(await Promise.all(pages.map(p=>p.locator('#key').innerText())),keys);assert.equal(await c.locator('#phase').innerText(),'① 相手のQRを読む');

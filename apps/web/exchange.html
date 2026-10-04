@@ -1,9 +1,9 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TONARI — QRで交換</title><link rel="stylesheet" href="./phone.css"><link rel="stylesheet" href="./exchange.css"></head><body><main>
-<header><span class="wordmark">TONARI</span><a href="./index.html">デモへ</a></header><p class="label">QRで、となりのひとと。</p><h1>一枚から、<br>はじめまして。</h1><p id="phase" class="phase">準備中</p>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TONARI — QRで交換</title><link rel="stylesheet" href="./phone.css"><link rel="stylesheet" href="./exchange.css"><link rel="stylesheet" href="./kawaii.css"></head><body><main>
+<header><span class="wordmark">TONARI</span><a href="./index.html">デモへ</a></header><p class="label">QRで、となりのひとと。</p><h1>一枚から、<br>はじめまして。</h1><tonari-guide state="welcome" compact></tonari-guide><details class="onboarding"><summary>交換のしかたを見る</summary><ol><li>相手のQRを読んでみよう。</li><li>渡すピースと、もらうピースを確認。</li><li>よければ交換。結果のQRをお返ししよう。</li></ol></details><p id="phase" class="phase">準備中</p>
 <p class="status" id="status" role="status">この端末の記録を開いています。</p>
 <canvas id="qr" aria-label="相手に見せる交換用QRコード"></canvas><p id="qr-label" class="hint">秘密鍵はQRに含みません。</p>
 <section id="pick"><label>渡すピース<select id="give"></select></label><label>受け取りたいピース<select id="want"></select></label><p class="fine">ここでは各端末に3枚を仮配置しています。</p></section>
 <section id="review" hidden><p id="terms"></p><button id="confirm">この内容で交換する</button><button id="decline" class="secondary">交換しない</button></section>
 <section id="reader"><button id="scan" disabled>相手のQRを読む</button><button id="stop" class="secondary" hidden>読み取りをやめる</button><video id="video" muted playsinline hidden></video><label class="file-button">QR画像を選ぶ<input id="image" type="file" accept="image/png,image/jpeg,image/webp"></label></section>
 <p id="key" class="key">鍵を準備中</p><p id="offline-status" class="fine">通信なしで開く準備をしています。</p><p class="fine">受け取りは仮状態。確定処理は未接続です。<br>サイトデータを削除すると鍵と記録を失います。</p>
-</main><script type="module" src="./exchange.mjs"></script></body></html>
+</main><script type="module" src="./exchange.mjs"></script><script type="module" src="./mascots.mjs"></script></body></html>
