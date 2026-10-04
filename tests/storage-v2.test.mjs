@@ -86,3 +86,19 @@ test('historical packet import cannot bypass stale owners using a foreign or for
  await assert.rejects(()=>f.a.receive(packet,f.config,2000,wrong),/WRONG_SETTLEMENT/);proof.value.id=id(22);await assert.rejects(()=>f.a.receive(packet,f.config,2000,proof),/BAD_AUTHORITY_SIGNATURE/);
  assert.equal((await f.a.receipts(f.config)).length,0);assert.ok(await f.a.intent(f.config.show));f.roots.forEach(r=>r.close());
 });
+
+test('verified observation clock persists through reopen; replay cannot renew acceptance time',async()=>{
+ const f=await fixture();
+ const next=await signAttestation({...f.state,slot:2,observedAt:110},f.authority);
+ await f.a.saveState(next,f.config,3710);assert.deepEqual(await f.a.clockAnchor(f.config),{slot:2,observedAt:110,receivedAt:3710});
+ await f.a.saveState(next,f.config,3800);assert.equal((await f.a.clockAnchor(f.config)).receivedAt,3710);
+ f.roots[0].close();const reopened=await DeviceStore.open('phone-0');assert.equal((await reopened.exchange.clockAnchor(f.config)).receivedAt,3710);
+ const forged=structuredClone(next);forged.value.observedAt=10000;await assert.rejects(()=>reopened.exchange.saveState(forged,f.config,3800),/BAD_AUTHORITY_SIGNATURE/);
+ assert.equal((await reopened.exchange.clockAnchor(f.config)).observedAt,110);reopened.close();f.roots.slice(1).forEach(r=>r.close());
+});
+test('clock anchor and ownership snapshot commit together or both roll back',async()=>{
+ const f=await fixture(),before=await f.a.clockAnchor(f.config),next=await signAttestation({...f.state,slot:2,observedAt:110},f.authority);
+ const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(...args){if(this.name==='v2states'){this.transaction.abort();throw Error('STATE_ABORT');}return put.apply(this,args);};
+ try{await assert.rejects(()=>f.a.saveState(next,f.config,3710),/STATE_ABORT/);}finally{IDBObjectStore.prototype.put=put;}
+ assert.deepEqual(await f.a.clockAnchor(f.config),before);assert.equal((await f.a.state(f.config)).slot,1);f.roots.forEach(r=>r.close());
+});
