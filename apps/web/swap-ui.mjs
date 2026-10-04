@@ -3,7 +3,7 @@ import {hex,fromHex} from '../../packages/protocol/swap.mjs';
 import {signOffer,inspectOffer,acceptOffer,decodeOffer,BODY_BYTES} from '../../packages/protocol/swap-v2.mjs';
 import {publicKeyWire,signedOfferWire,encodeWire,decodeWire,readSignedOfferWire,readReceiptWire} from '../../packages/protocol/wire-v2.mjs';
 import {checkOwned} from '../../packages/protocol/attestation.mjs';
-import {chainAPI,validateConfig,joinMessage} from './chain-api.mjs';
+import {chainAPI,validateConfig,joinMessage,settlementPresentation} from './chain-api.mjs';
 import {qrRaster} from '../../packages/protocol/qr.mjs';
 import {CameraReader,readQRFile} from './camera.mjs';
 import {prepareOffline} from './offline.mjs';
@@ -37,8 +37,11 @@ function showOffer(o){$('#pick').hidden=true;$('#review').hidden=false;$('#reade
 function complete(r){
  receipt=r;sent=null;pending=null;camera.stop();document.querySelector('tonari-guide').setAttribute('state','swap');$('#pick').hidden=true;$('#review').hidden=true;$('#reader').hidden=true;$('#settlement').hidden=false;
  if(r.offer.b===device.publicKey)draw(encodeWire('R',fromHex(r.packet,368)),'相手にこの結果QRを返してください。');else{$('#qr').hidden=true;$('#qr-label').textContent='双方の署名を、この端末に保存しました。';}
- const final=r.ownershipFinal===true;$('#phase').textContent=final?'④ 交換が確定しました ✓':'③ 仮受け取りを保存しました ✓';$('#status').textContent=final?'ローカルチェーンの確定記録を確認しました。':'双方の署名を確認しました。通信が戻ったら確定できます。';
- $('#settle').disabled=final;$('#chain-status').textContent=final?'ローカル検証の確定済み記録です。':'確定前のピースは、別の交換に使いません。';$('#transaction').textContent=final?'ローカル取引 '+r.settlement.value.signature:'';
+ const final=r.ownershipFinal===true;$('#phase').textContent=final?'④ 交換が確定しました ✓':'③ 仮受け取りを保存しました ✓';$('#status').textContent=final?(config.cluster==='devnet'?'Solana Devnetの確定記録を確認しました。':'ローカルチェーンの確定記録を確認しました。'):'双方の署名を確認しました。通信が戻ったら確定できます。';
+ $('#settle').disabled=final;$('#chain-status').textContent='確定前のピースは、別の交換に使いません。';$('#transaction').replaceChildren();
+ if(final){const view=settlementPresentation(config,r.settlement.value.signature);$('#chain-status').textContent=view.status;
+  if(view.url){const link=document.createElement('a');link.href=view.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=view.label;$('#transaction').append(link);}else $('#transaction').textContent=view.label;
+ }
  document.documentElement.dataset.swapState=final?'confirmed':'provisional';
  if(final)sync.stop();else sync.start();
 }

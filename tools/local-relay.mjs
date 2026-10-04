@@ -1,4 +1,4 @@
-/** Local validator sponsor only. No wallet files, remote RPC, or public deployment. */
+/** Bounded three-device sponsor: local validator or explicit operator Devnet demo. */
 import {randomBytes,createPrivateKey,sign} from 'node:crypto';
 import {Connection,Keypair,PublicKey,sendAndConfirmTransaction} from '@solana/web3.js';
 import * as chain from './chain-client.mjs';
@@ -8,18 +8,42 @@ import {hex,fromHex} from '../packages/protocol/swap.mjs';
 export const tileId=n=>Buffer.alloc(32,n);
 export const joinMessage=(config,client,key)=>new TextEncoder().encode(`TONARI/v2/local-join\0${config.show}:${client}:${key}`);
 export function requireLocalRPC(rpc){const u=new URL(rpc);if(u.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(u.hostname)||u.username||u.password||u.search||u.hash)throw Error('LOCAL_RPC_REQUIRED');return rpc;}
-export async function createLocalRelay(rpc,{onSubmitted=()=>{}}={}){
- const c=new Connection(requireLocalRPC(rpc),'finalized'),payer=Keypair.generate(),seed=randomBytes(32),show=chain.showAddress(seed);
- if(!(await c.getAccountInfo(chain.PROGRAM_ID,'finalized'))?.executable)throw Error('LOCAL_PROGRAM_NOT_LOADED');
- const funding=await c.requestAirdrop(payer.publicKey,5e9);await c.confirmTransaction(funding,'finalized');
+export const DEVNET_RPC='https://api.devnet.solana.com';
+export const DEVNET_GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
+export const DEVNET_OPERATOR='8k7ygJWhiRu5BrPuvHPesR7CH1QTBmNEMJvFDpRjLFWf';
+export function requireDevnetGenesis(value){if(value!==DEVNET_GENESIS)throw Error('WRONG_GENESIS');}
+export function requireDevnetRPC(rpc){if(rpc!==DEVNET_RPC)throw Error('DEVNET_RPC_REQUIRED');return rpc;}
+export async function createLocalRelay(rpc,options={}){return createRelay(requireLocalRPC(rpc),'localnet',options);}
+export async function createDevnetRelay({rpc=DEVNET_RPC,payer,seed,bindings=[],persistBindings}){
+ requireDevnetRPC(rpc);
+ if(!(payer instanceof Keypair)||payer.publicKey.toBase58()!==DEVNET_OPERATOR)throw Error('DEVNET_OPERATOR_REQUIRED');
+ if(!(seed instanceof Uint8Array)||seed.length!==32)throw Error('PERSISTENT_SHOW_SEED_REQUIRED');
+ if(!Array.isArray(bindings)||typeof persistBindings!=='function')throw Error('PERSISTENT_BINDINGS_REQUIRED');
+ return createRelay(rpc,'devnet',{payer,seed:Buffer.from(seed),bindings,persistBindings});
+}
+async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generate(),seed=randomBytes(32),bindings=[],persistBindings=async()=>{}}={}){
+ const c=new Connection(rpc,'finalized'),show=chain.showAddress(seed);
+ if(cluster==='devnet')requireDevnetGenesis(await c.getGenesisHash());
+ if(!(await c.getAccountInfo(chain.PROGRAM_ID,'finalized'))?.executable)throw Error('PROGRAM_NOT_LOADED');
+ if(cluster==='localnet'){const funding=await c.requestAirdrop(payer.publicKey,5e9);await c.confirmTransaction(funding,'finalized');}
+ // Public devnet uses only the explicitly configured test operator. No faucet.
+ if(cluster==='devnet'&&await c.getBalance(payer.publicKey,'finalized')<30000000)throw Error('DEVNET_TEST_BALANCE_LOW');
  const privateKey=createPrivateKey({key:Buffer.concat([Buffer.from('302e020100300506032b657004220420','hex'),Buffer.from(payer.secretKey.subarray(0,32))]),format:'der',type:'pkcs8'});
  const attest=value=>({value,signature:sign(null,attestationBytes(value),privateKey).toString('hex')});
  async function clock(){const slot=await c.getSlot('finalized'),now=await c.getBlockTime(slot);if(!Number.isInteger(now))throw Error('CLOCK_UNAVAILABLE');return now;}
  async function send(instructions){const latest=await c.getLatestBlockhash('finalized'),tx=chain.transaction(payer.publicKey,latest.blockhash,instructions);if(chain.serializedSize(tx)>1232)throw Error('TX_TOO_LARGE');return sendAndConfirmTransaction(c,tx,[payer],{commitment:'finalized',skipPreflight:false});}
- const deadline=(await clock())+1800;
- await send([chain.createShow(payer.publicKey,seed,deadline,24)]);
- const config={show:hex(show.toBytes()),policy:hex(chain.policyHash(show,deadline,24)),issuer:hex(payer.publicKey.toBytes()),cluster:'localnet',programId:chain.PROGRAM_ID.toBase58()};
- const clients=new Map(),allIds=[0,1,2,8,9,10,16,17,18],receipts=new Map();let tail=Promise.resolve();
+ const existingShow=await c.getAccountInfo(show,'finalized');
+ const savedShow=existingShow&&chain.readAccount(existingShow,'Show');
+ if(savedShow&&(!savedShow.authority.equals(payer.publicKey)||savedShow.cap!==24))throw Error('SHOW_CHANGED');
+ const deadline=savedShow?savedShow.deadline:(await clock())+1800;
+ if(savedShow&&hex(savedShow.policy)!==hex(chain.policyHash(show,deadline,24)))throw Error('SHOW_CHANGED');
+ if(!savedShow)await send([chain.createShow(payer.publicKey,seed,deadline,24)]);
+ const config={show:hex(show.toBytes()),policy:hex(chain.policyHash(show,deadline,24)),issuer:hex(payer.publicKey.toBytes()),cluster,programId:chain.PROGRAM_ID.toBase58()};
+ const clients=new Map();
+ for(const [client,key] of bindings){if(![0,1,2].includes(client)||clients.has(client)||[...clients.values()].includes(key))throw Error('BAD_BINDINGS');fromHex(key,32);clients.set(client,key);}
+ for(const ownerKey of clients.values()){const owner=new PublicKey(fromHex(ownerKey,32)),info=await c.getAccountInfo(chain.ticketAddress(show,owner),'finalized');
+  const ticket=chain.readAccount(info,'Ticket');if(!ticket.owner.equals(owner)||!ticket.show.equals(show))throw Error('BAD_BINDINGS');}
+ const allIds=[0,1,2,8,9,10,16,17,18],receipts=new Map();let tail=Promise.resolve();
  const serial=job=>{const result=tail.then(job);tail=result.catch(()=>{});return result;};
  const common=(kind,slot,observedAt)=>({kind,...Object.fromEntries(['show','policy','issuer','cluster'].map(k=>[k,config[k]])),slot,observedAt});
  async function state(){
@@ -38,7 +62,7 @@ export async function createLocalRelay(rpc,{onSubmitted=()=>{}}={}){
     if(!existing[0]||existing.slice(1).some(i=>!i||!chain.readAccount(i,'Tile').owner.equals(owner)))throw Error('CLIENT_ALREADY_BOUND');
     const ticket=chain.readAccount(existing[0],'Ticket');if(!ticket.show.equals(show)||!ticket.owner.equals(owner))throw Error('BAD_TICKET');
    }else await send([chain.registerTicket(payer.publicKey,show,owner),...ids.map(n=>chain.issueTile(payer.publicKey,show,owner,tileId(n)))]);
-   clients.set(client,publicKey);return state();
+   await persistBindings([...clients.entries(),[client,publicKey]]);clients.set(client,publicKey);return state();
   });
  }
  async function settle({packet}){

@@ -1,11 +1,13 @@
 /** Real localhost validator integration, not a mock RPC or public transaction. */
+import {Keypair} from '@solana/web3.js';
+import {randomBytes} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {createLocalRelay,tileId,joinMessage} from '../tools/local-relay.mjs';
 import {createDevice,hex} from '../packages/protocol/swap.mjs';
 import {signOffer,acceptOffer} from '../packages/protocol/swap-v2.mjs';
 import {verifyAttestation} from '../packages/protocol/attestation.mjs';
-let loseResponse=true;
-const relay=await createLocalRelay(process.env.TONARI_LOCAL_RPC||'http://127.0.0.1:18999',{onSubmitted:()=>{if(loseResponse){loseResponse=false;throw Error('INJECTED_LOST_RESPONSE_AFTER_FINALIZED');}}});
+let loseResponse=true;const payer=Keypair.generate(),seed=randomBytes(32);let bindings=[];const persistent={payer,seed,persistBindings:async next=>{bindings=next;}};
+const relay=await createLocalRelay(process.env.TONARI_LOCAL_RPC||'http://127.0.0.1:18999',{...persistent,onSubmitted:()=>{if(loseResponse){loseResponse=false;throw Error('INJECTED_LOST_RESPONSE_AFTER_FINALIZED');}}});
 const devices=await Promise.all([0,1,2].map(()=>createDevice())),results=[];
 const join=async(i,device=devices[i])=>relay.join({client:i,publicKey:device.publicKey,proof:hex(new Uint8Array(await crypto.subtle.sign('Ed25519',device.privateKey,joinMessage(relay.config,i,device.publicKey))))});
 for(let i=0;i<3;i++)await join(i);
@@ -18,4 +20,7 @@ const envelope=await relay.settle({packet:hex(packet)}),receipt=await verifyAtte
 assert.deepEqual(await relay.settle({packet:hex(packet)}),envelope);results.push('nonce and pair markers recover exact transaction; repeated retries return same signature');
 const after=await verifyAttestation(await relay.state(),relay.config),a=after.tiles.find(t=>t.id===o.tileA),b=after.tiles.find(t=>t.id===o.tileB);assert.equal(a.owner,devices[1].publicKey);assert.equal(b.owner,devices[0].publicKey);assert.equal(a.version,1);assert.equal(b.version,1);
 assert.deepEqual(after.tiles.filter(t=>![o.tileA,o.tileB].includes(t.id)),before.tiles.filter(t=>![o.tileA,o.tileB].includes(t.id)));results.push('actual chain ownership versions changed exactly once; seven unrelated tiles unchanged');
+const restarted=await createLocalRelay(process.env.TONARI_LOCAL_RPC||'http://127.0.0.1:18999',{...persistent,bindings});
+assert.deepEqual(restarted.config,relay.config);await restarted.join({client:0,publicKey:devices[0].publicKey,proof:hex(new Uint8Array(await crypto.subtle.sign('Ed25519',devices[0].privateKey,joinMessage(restarted.config,0,devices[0].publicKey))))});
+assert.deepEqual(await restarted.settle({packet:hex(packet)}),envelope);results.push('relay restart preserves show and device slots; finalized chain history restores same receipt');
 console.log(JSON.stringify({status:'LOCAL_RELAY_VALIDATOR_PASS',checks:results,signature:receipt.signature,slot:receipt.slot,cluster:'localnet',realPublicChain:false,spend:0},null,2));
