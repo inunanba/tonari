@@ -3,10 +3,15 @@ const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright'),assert=req
 (async()=>{
  // A finalized local show takes several slots to create. Bounded readiness loop.
  let ready=false;for(let i=0;i<90;i++){try{if((await fetch('http://127.0.0.1:4173/api/tonari/config')).ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,1000));}assert(ready,'LOCAL_RELAY_NOT_READY');
- const opts={headless:true,args:['--no-sandbox']};if(process.env.TONARI_CHROME_PATH)opts.executablePath=process.env.TONARI_CHROME_PATH;else opts.channel='chrome';const browser=await chromium.launch(opts);
+ const opts={headless:true,args:['--no-sandbox']};if(process.env.TONARI_CHROME_PATH)opts.executablePath=process.env.TONARI_CHROME_PATH;else opts.channel='chrome';const browser=await chromium.launch(opts);let pages=[];const network=[];
  try{
-  const context=await browser.newContext({viewport:{width:390,height:844}}),pages=await Promise.all([context.newPage(),context.newPage(),context.newPage()]),errors=[],external=[];
+  const context=await browser.newContext({viewport:{width:390,height:844}}),errors=[],external=[];pages=await Promise.all([context.newPage(),context.newPage(),context.newPage()]);
+  await context.addInitScript(()=>{window.tonariNetworkEvents={online:0,offline:0};for(const kind of ['online','offline'])addEventListener(kind,()=>window.tonariNetworkEvents[kind]++);});
   for(const p of pages){p.on('pageerror',e=>errors.push(e.message));p.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4173/'))external.push(r.url());});}
+  for(const [client,p] of pages.entries()){
+   p.on('requestfailed',r=>{if(r.url().includes('/api/tonari/'))network.push({client,path:new URL(r.url()).pathname,event:'requestfailed',error:r.failure()?.errorText});});
+   p.on('response',async r=>{if(r.url().includes('/api/tonari/')){const entry={client,path:new URL(r.url()).pathname,status:r.status()};if(!r.ok())try{entry.body=(await r.text()).slice(0,500);}catch{}network.push(entry);}});
+  }
   await Promise.all(pages.map((p,i)=>p.goto('http://127.0.0.1:4173/apps/web/swap.html?client='+i)));
   for(const p of pages)await p.waitForFunction(()=>document.documentElement.dataset.chainReady==='true'&&document.documentElement.dataset.offlineReady==='true',null,{timeout:180000});
   const [a,b,c]=pages,keys=await Promise.all(pages.map(p=>p.locator('#key').innerText()));assert.equal(new Set(keys).size,3);
@@ -19,11 +24,19 @@ const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright'),assert=req
   await b.locator('#confirm').click();await b.getByText('③ 仮受け取りを保存しました ✓').waitFor();await upload(a,await png(b));await a.getByText('③ 仮受け取りを保存しました ✓').waitFor();
   await a.locator('#settle').click();await a.getByText('仮受け取りは保存されています。',{exact:false}).waitFor();assert.equal(await a.locator('html').getAttribute('data-swap-state'),'provisional');
   await Promise.all([a.reload(),b.reload()]);for(const p of [a,b])await p.getByText('③ 仮受け取りを保存しました ✓').waitFor();
-  await context.setOffline(false);for(const p of [a,b])await p.getByText('④ 交換が確定しました ✓').waitFor({timeout:180000});
+  // Suppress the online notification deliberately. The restored pending record must
+  // independently retry and settle on a visible page, using the exact same packet.
+  for(const p of [a,b])await p.evaluate(()=>addEventListener('online',e=>e.stopImmediatePropagation(),{capture:true}));
+  await context.setOffline(false);for(const p of [a,b]){await p.bringToFront();await p.getByText('④ 交換が確定しました ✓').waitFor({timeout:180000});}
   const txs=await Promise.all([a,b].map(p=>p.locator('#transaction').innerText()));assert.equal(txs[0],txs[1]);
   await context.setOffline(true);await Promise.all([a.reload(),b.reload()]);for(const p of [a,b])await p.getByText('④ 交換が確定しました ✓').waitFor();assert.deepEqual(await Promise.all(pages.map(p=>p.locator('#key').innerText())),keys);
   const counts=await Promise.all(pages.map((p,i)=>p.evaluate(async i=>{const {DeviceStore}=await import('/packages/protocol/storage.mjs');const root=await DeviceStore.open('phone-'+i),s=root.exchange,config=await s.config(),rows=await s.receipts(config);root.close();return rows.length;},i)));assert.deepEqual(counts,[1,1,0]);assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
   await a.screenshot({path:'docs/v2-local-confirmed.png',fullPage:true,animations:'disabled',timeout:120000});
-  console.log(JSON.stringify({status:'PASS',v2_qr:true,offline_signed_exchange:true,pending_reload:true,offline_retry_preserves_provisional:true,real_local_finalized:true,same_transaction_for_both_devices:true,confirmed_offline_reload:true,third_device_unchanged:true,page_errors:errors,external_requests:external.length,cluster:'localnet',devnet:false}));
+  console.log(JSON.stringify({status:'PASS',v2_qr:true,offline_signed_exchange:true,pending_reload:true,offline_retry_preserves_provisional:true,online_event_suppressed:true,real_local_finalized:true,same_transaction_for_both_devices:true,confirmed_offline_reload:true,third_device_unchanged:true,page_errors:errors,external_requests:external.length,network:network.slice(-80),cluster:'localnet',devnet:false}));
+ }catch(error){
+  const states=await Promise.all(pages.map(async(p,client)=>{try{return await p.evaluate(client=>({client,online:navigator.onLine,hidden:document.hidden,phase:document.querySelector('#phase')?.textContent,status:document.querySelector('#status')?.textContent,chainStatus:document.querySelector('#chain-status')?.textContent,settleDisabled:document.querySelector('#settle')?.disabled,swapState:document.documentElement.dataset.swapState,events:window.tonariNetworkEvents}),client);}catch(e){return {client,error:e.message};}}));
+  console.error(JSON.stringify({status:'FAIL_DIAGNOSTIC',error:error.message,states,network:network.slice(-80)}));
+  for(const [i,p] of pages.entries())try{await p.screenshot({path:`docs/v2-chain-failure-client-${i}.png`,fullPage:true,animations:'disabled',timeout:15000});}catch{}
+  throw error;
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -74,3 +74,15 @@ test('confirmation abort preserves provisional receipt and retry; immutable inpu
  try{await assert.rejects(()=>f.a.confirm(row.id,envelope,f.config),/CONFIRM_ABORT/);}finally{IDBObjectStore.prototype.put=put;}
  assert.equal((await f.a.receipts(f.config))[0].status,'PROVISIONAL');const promise=f.a.confirm(row.id,envelope,f.config);envelope.value.id=id(18);await promise;assert.equal((await f.a.receipts(f.config))[0].status,'CONFIRMED');f.roots.forEach(r=>r.close());
 });
+test('sender imports an already finalized peer packet after its cached owners advanced and deadline passed',async()=>{
+ const f=await fixture(),{signed,packet}=await f.make();await f.a.saveIntent(f.config,{direction:'sent',signed},100);
+ const advanced=await signAttestation({...f.state,slot:3,tiles:f.state.tiles.map((t,i)=>i<2?{...t,version:1,owner:i===0?f.b.device.publicKey:f.a.device.publicKey}:t)},f.authority);await f.a.saveState(advanced,f.config);
+ await assert.rejects(()=>f.a.receive(packet,f.config,240),/STALE_OWNERSHIP/);
+ const proof=await f.settlement(packet),row=await f.a.receive(packet,f.config,2000,proof);assert.equal(row.status,'CONFIRMED');assert.equal(row.importedAt,2000);assert.equal(row.acceptedAt,240);assert.equal((await f.a.receipts(f.config))[0].ownershipFinal,true);assert.equal(await f.a.intent(f.config.show),undefined);f.roots.forEach(r=>r.close());
+});
+test('historical packet import cannot bypass stale owners using a foreign or forged finalized proof',async()=>{
+ const f=await fixture(),{signed,packet}=await f.make();await f.a.saveIntent(f.config,{direction:'sent',signed},100);
+ const proof=await f.settlement(packet);proof.value.id=id(21);const wrong=await signAttestation(proof.value,f.authority);
+ await assert.rejects(()=>f.a.receive(packet,f.config,2000,wrong),/WRONG_SETTLEMENT/);proof.value.id=id(22);await assert.rejects(()=>f.a.receive(packet,f.config,2000,proof),/BAD_AUTHORITY_SIGNATURE/);
+ assert.equal((await f.a.receipts(f.config)).length,0);assert.ok(await f.a.intent(f.config.show));f.roots.forEach(r=>r.close());
+});

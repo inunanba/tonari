@@ -22,13 +22,16 @@ export class ExchangeStore {
    else{tx.objectStore('v2intents').delete(config.show);done();}
   }catch(e){abort(e);}};});
  }
- async receive(packet,config,now){
-  const bytes=packet.slice(),r=await inspectPacket(bytes,{...config,now},{settlement:true});if(![r.offer.a,r.offer.b].includes(this.device.publicKey))throw Error('NOT_PARTICIPANT');
-  const row={...r,acceptedAt:now,packet:hex(bytes)};
+ async receive(packet,config,now,settlement=null){
+  const bytes=packet.slice(),proof=settlement&&structuredClone(settlement),v=proof&&await verifyAttestation(proof,config);
+  if(v&&v.kind!=='settled')throw Error('WRONG_SETTLEMENT');
+  const r=await inspectPacket(bytes,{...config,now:v?v.observedAt:now},{settlement:true});if(![r.offer.a,r.offer.b].includes(this.device.publicKey))throw Error('NOT_PARTICIPANT');
+  if(v&&v.id!==r.id)throw Error('WRONG_SETTLEMENT');
+  const row={...r,acceptedAt:v?v.observedAt:now,importedAt:now,packet:hex(bytes),...(proof?{settlement:proof}:{})};
   return this.write(['v2receipts','v2intents','v2states'],(tx,done,abort)=>{const s=tx.objectStore('v2receipts'),q=s.getAll();q.onsuccess=()=>{try{
    checkReservations(q.result,r.offer,r.id);const state=tx.objectStore('v2states').get(config.show);state.onsuccess=()=>{try{
-    if(!state.result)throw Error('STATE_UNAVAILABLE');checkOwned(state.result.value,r.offer);
-    const intent=tx.objectStore('v2intents').get(config.show);intent.onsuccess=()=>{try{if(!intent.result||intent.result.signed.body!==hex(bytes.slice(0,BODY_BYTES)))throw Error('INTENT_MISMATCH');s.add(row);tx.objectStore('v2intents').delete(config.show);done(row);}catch(e){abort(e);}};
+    if(!state.result)throw Error('STATE_UNAVAILABLE');if(!proof)checkOwned(state.result.value,r.offer);
+    const intent=tx.objectStore('v2intents').get(config.show);intent.onsuccess=()=>{try{if(!intent.result||intent.result.signed.body!==hex(bytes.slice(0,BODY_BYTES)))throw Error('INTENT_MISMATCH');s.add(row);tx.objectStore('v2intents').delete(config.show);done(proof?{...row,status:'CONFIRMED',ownershipFinal:true}:row);}catch(e){abort(e);}};
    }catch(e){abort(e);}};
   }catch(e){abort(e);}};});
  }
