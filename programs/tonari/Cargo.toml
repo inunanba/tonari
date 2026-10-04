@@ -1,0 +1,20 @@
+[package]
+name = "tonari"
+version = "0.6.0"
+edition = "2021"
+rust-version = "1.84"
+license = "MIT"
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "tonari"
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build"]
+[dependencies]
+anchor-lang = "=0.32.1"
+solana-sha256-hasher = "=2.3.0"
+solana-sdk-ids = "=2.2.1"

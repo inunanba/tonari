@@ -1,3 +1,6 @@
 node_modules/
 docs/*-preview.png
 .DS_Store
+target/
+.anchor/
+test-ledger/
