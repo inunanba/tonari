@@ -2,7 +2,7 @@
 
 並ぶ時間を、となりの人との小さな共同体験に。
 
-Development checkpoint **0.3**, not a finished submission. The product joins an offline co-op mosaic with an auditable, capacity-aware venue allocation system. This slice adds persisted keys/receipts and a cached offline shell to the signed exchange preview; the allocator and Solana settlement are upcoming work.
+Development checkpoint **0.4**, not a finished submission. The product joins an offline co-op mosaic with an auditable, capacity-aware venue allocation system. This slice adds persisted keys/receipts and a cached offline shell to the signed exchange preview; the deterministic allocator/governor operator model is available; Solana settlement remains upcoming work.
 
 ## Run this checkpoint
 
@@ -28,3 +28,9 @@ No money, prize, token sale or resale. Completion is intended as a non-transfera
 See [protocol](docs/PROTOCOL.md), [architecture and risk decisions](docs/ARCHITECTURE.md), [competitive review](docs/R0_REVIEW.md), [storage checkpoint and measured gaps](docs/R1_STORAGE.md). Public deployment is handled by the assigned operator; this checkpoint makes no chain transaction.
 
 Standalone QR: open `/apps/web/exchange.html?client=0` and `?client=1` on two independent clients; choose pieces, read the key QR, read/confirm the offer, return/read the receipt QR. File-image and camera input are local. See [QR evidence and gaps](docs/R1_QR.md) and [third-party licenses](docs/THIRD_PARTY.md).
+
+## Allocation and warning-control model
+
+Open `/apps/web/operations.html` for simulatedG21 congestion, same-window hold, TONARI-induced-arrival warning and operator stop. Original Python deterministic allocation128 and governor54 vectors are checked independently; product hardening deliberately preserves the operator cap and prevents same-window reentry. Inputs/traces are explicitly simulated, unsigned and not calibrated. No real issuance or full crowd-simulation parity is claimed. See `docs/R1_ALLOCATOR.md`.
+
+Browser checks: `node tests/operations-browser.cjs` and `node tests/qr-browser.cjs` require installed Chrome/Playwright. Screenshot capture disables animations and allows120s; this fixes the observed final-capture timeout without changing exchange assertions. Exact corrected browser checks are pending host execution.
