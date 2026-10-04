@@ -7,13 +7,14 @@ import {chainAPI,validateConfig,joinMessage} from './chain-api.mjs';
 import {qrRaster} from '../../packages/protocol/qr.mjs';
 import {CameraReader,readQRFile} from './camera.mjs';
 import {prepareOffline} from './offline.mjs';
+import {observedNow,offerTime} from '../../packages/protocol/observed-clock.mjs';
 import {SettlementRetry} from './settlement-retry.mjs';
 const $=s=>document.querySelector(s),params=new URL(location.href).searchParams,client=params.has('client')?Number(params.get('client')):0;
 if(![0,1,2].includes(client))throw Error('BAD_CLIENT');
-const now=()=>Math.floor(Date.now()/1000),number=id=>parseInt(id.slice(0,2),16)+1;
-let root,store,device,config,state,sent,pending,receipt,busy=false,settling=false;
+const wallNow=()=>Math.floor(Date.now()/1000),now=()=>observedNow(anchor,wallNow()),number=id=>parseInt(id.slice(0,2),16)+1;
+let root,store,device,config,state,anchor,sent,pending,receipt,busy=false,settling=false;
 const camera=new CameraReader($('#video'));
-const fail=e=>{$('#status').textContent='確認できませんでした：'+e.message;};
+const fail=e=>{const text={OWNERSHIP_OBSERVATION_EXPIRED:'通信を戻し、所有権を更新してから交換を頼んでください。',CLOCK_ANCHOR_UNAVAILABLE:'通信を戻し、所有権を更新してください。',LOCAL_CLOCK_ROLLBACK:'端末の時計を確かめ、通信を戻して所有権を更新してください。'};$('#status').textContent='確認できませんでした：'+(text[e.message]||e.message);};
 const retryable=e=>e instanceof TypeError||['AbortError','TimeoutError'].includes(e.name)||e.message==='CHAIN_SERVICE_UNAVAILABLE';
 const sync=new SettlementRetry({attempt:settle,isPending:()=>!!config&&!!receipt&&!receipt.ownershipFinal,isOnline:()=>navigator.onLine,isVisible:()=>!document.hidden});
 function draw(text,label){const r=qrRaster(text),c=$('#qr');c.hidden=false;c.width=r.width;c.height=r.height;c.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);$('#qr-label').textContent=label;}
@@ -23,7 +24,7 @@ function picks(){
  }}
  $('#pick').hidden=false;$('#reader').hidden=false;$('#scan').disabled=false;draw(publicKeyWire(device.publicKey),'交換を頼むひとに、このQRを見せてください。');$('#phase').textContent='① 相手のQRを読む';$('#status').textContent='所有権を確認してから、一枚ずつ交換します。';
 }
-async function refresh(){state=await store.saveState(await chainAPI('state'),config);return state;}
+async function refresh(){state=await store.saveState(await chainAPI('state'),config);anchor=await store.clockAnchor(config);return state;}
 async function refreshWhenAvailable(){
  if(!navigator.onLine)return;
  try{await refresh();}catch(e){
@@ -50,8 +51,8 @@ async function read(text){if(busy||receipt)return;busy=true;try{
  if(data.type==='K'){
   if(sent||pending)throw Error('いまの交換を完了してください。');const b=hex(data.bytes);if(b===device.publicKey)throw Error('自分のQRです。');
   await refreshWhenAvailable();const aTile=state.tiles.find(t=>t.id===$('#give').value),bTile=state.tiles.find(t=>t.id===$('#want').value);if(!aTile||!bTile||aTile.owner!==device.publicKey||bTile.owner!==b)throw Error('STALE_OWNERSHIP');
-  const at=now(),o={show:config.show,a:device.publicKey,b,tileA:aTile.id,tileB:bTile.id,nonce:hex(crypto.getRandomValues(new Uint8Array(16))),issuedAt:at,expiresAt:at+120,policy:config.policy,versionA:aTile.version,versionB:bTile.version,settleBy:Math.min(state.deadline,at+7*86400),reserved:0};checkOwned(state,o);
-  const signed=await signOffer(device,o);await store.saveIntent(config,{direction:'sent',signed},at);sent=signed;$('#pick').hidden=true;$('#cancel').hidden=false;draw(signedOfferWire(signed),'相手にこのQRを見せ、内容を確かめてもらいます。');$('#phase').textContent='② 相手の確認を待つ';$('#status').textContent='2分以内に相手に確認してもらい、結果QRを読んでください。';
+  const times=offerTime(state,anchor,wallNow()),at=now(),o={show:config.show,a:device.publicKey,b,tileA:aTile.id,tileB:bTile.id,nonce:hex(crypto.getRandomValues(new Uint8Array(16))),issuedAt:times.issuedAt,expiresAt:times.expiresAt,policy:config.policy,versionA:aTile.version,versionB:bTile.version,settleBy:times.settleBy,reserved:0};checkOwned(state,o);
+  const signed=await signOffer(device,o);await store.saveIntent(config,{direction:'sent',signed},at);sent=signed;$('#pick').hidden=true;$('#cancel').hidden=false;draw(signedOfferWire(signed),'相手にこのQRを見せ、内容を確かめてもらいます。');$('#phase').textContent='② 相手の確認を待つ';$('#status').textContent='残り '+(o.expiresAt-at)+' 秒以内に相手に確認してもらい、結果QRを読んでください。';
  }else if(data.type==='O'){
   if(sent||pending)throw Error('いまの交換を完了してください。');const signed=readSignedOfferWire(text),o=await inspectOffer(signed,{...config,now:now()});if(o.b!==device.publicKey)throw Error('この端末宛ての交換ではありません。');
   await refreshWhenAvailable();checkOwned(state,o);await store.saveIntent(config,{direction:'pending',signed},now());pending={signed,offer:o};showOffer(o);
@@ -73,6 +74,7 @@ try{
  if(navigator.onLine)try{const proof=hex(new Uint8Array(await crypto.subtle.sign('Ed25519',device.privateKey,joinMessage(config,client,device.publicKey))));state=await store.saveState(await chainAPI('join',{client,publicKey:device.publicKey,proof}),config);}catch(e){if(!state)throw e;}
  if(!state)throw Error('STATE_UNAVAILABLE');
  const rows=await store.receipts(config);if(rows.length)complete(rows.at(-1));else{
+  anchor=await store.clockAnchor(config);
   const intent=await store.intent(config.show);if(intent){try{
    const saved=decodeOffer(fromHex(intent.signed.body,BODY_BYTES));
    const o=await inspectOffer(intent.signed,{...config,now:intent.direction==='sent'?saved.issuedAt:now()});

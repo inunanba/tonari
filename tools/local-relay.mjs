@@ -64,7 +64,11 @@ export async function createLocalRelay(rpc,{onSubmitted=()=>{}}={}){
      throw Error('FINALIZED_TRANSACTION_UNAVAILABLE');
     }
    }
-   await inspectPacket(p,{...config,now:await clock()},{settlement:true});
+   const chainNow=await clock();
+   try{await inspectPacket(p,{...config,now:chainNow},{settlement:true});}catch(e){
+    if(e.message==='SETTLEMENT_EXPIRED_OR_FUTURE')console.warn('SETTLEMENT_CLOCK_CHECK',JSON.stringify({chainNow,issuedAt:o.issuedAt,expiresAt:o.expiresAt,settleBy:o.settleBy,deadline,wallNow:Math.floor(Date.now()/1000)}));
+    throw e;
+   }
    const signature=await send(expected);
    await onSubmitted(signature); // Test hook for a lost response; never exposed over HTTP.
    // A successful finalized transaction alone is insufficient: check both replay markers.

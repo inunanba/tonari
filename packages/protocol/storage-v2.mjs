@@ -9,9 +9,19 @@ export class ExchangeStore {
  read(name,key){return new Promise((resolve,reject)=>{const tx=this.db.transaction(name,'readonly'),r=tx.objectStore(name)[key===undefined?'getAll':'get'](key);let out;r.onsuccess=()=>out=r.result;tx.oncomplete=()=>resolve(out);tx.onabort=()=>reject(tx.error||Error('STORAGE_READ_FAILED'));});}
  write(names,job){return new Promise((resolve,reject)=>{const tx=this.db.transaction(names,'readwrite',{durability:'strict'});let value,error;try{job(tx,v=>value=v,e=>{error=e;tx.abort();});}catch(e){error=e;tx.abort();}tx.oncomplete=()=>resolve(value);tx.onabort=()=>reject(error||tx.error||Error('STORAGE_COMMIT_FAILED'));});}
  async state(config){const e=await this.read('v2states',config.show);return e?verifyAttestation(e,config):null;}
- async saveState(envelope,config){
+ async clockAnchor(config){
+  const state=await this.state(config),anchor=await this.read('v2settings','clock:'+config.show);
+  if(!state||!anchor||anchor.slot!==state.slot||anchor.observedAt!==state.observedAt)throw Error('CLOCK_ANCHOR_UNAVAILABLE');
+  return anchor;
+ }
+ async saveState(envelope,config,receivedAt=Math.floor(Date.now()/1000)){
+  if(!Number.isSafeInteger(receivedAt)||receivedAt<0)throw Error('BAD_LOCAL_TIME');
   const e=structuredClone(envelope),next=await verifyAttestation(e,config);if(next.kind!=='state')throw Error('EXPECTED_STATE');
-  return this.write(['v2states'],(tx,done,abort)=>{const s=tx.objectStore('v2states'),r=s.get(config.show);r.onsuccess=()=>{try{checkStateAdvance(r.result?.value,next);s.put(e,config.show);done(next);}catch(e){abort(e);}};});
+  return this.write(['v2states','v2settings'],(tx,done,abort)=>{const s=tx.objectStore('v2states'),r=s.get(config.show);r.onsuccess=()=>{try{checkStateAdvance(r.result?.value,next);const settings=tx.objectStore('v2settings'),key='clock:'+config.show,q=settings.get(key);q.onsuccess=()=>{try{
+   // Replaying the same observation must not restart its local acceptance window.
+   if(!q.result||q.result.slot!==next.slot||q.result.observedAt!==next.observedAt)settings.put({slot:next.slot,observedAt:next.observedAt,receivedAt},key);
+   s.put(e,config.show);done(next);
+  }catch(e){abort(e);}};}catch(e){abort(e);}};});
  }
  intent(show){return this.read('v2intents',show);}
  async saveIntent(config,intent,now){
