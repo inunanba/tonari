@@ -60,6 +60,7 @@ window.addEventListener('message',async event=>{
   } catch(e) {error(e);}
 });
 function markPending(tile) {
+  document.querySelector("tonari-guide").setAttribute("state","swap");
   const n=parseInt(tile.slice(0,2),16),cell=$(`[data-tile="${n}"]`);
   if(cell){cell.classList.add('pending');cell.textContent='◇';}
   $('#count').textContent='3枚 ＋ 仮1枚';$('#offer').disabled=true;$('#accept').hidden=true;
