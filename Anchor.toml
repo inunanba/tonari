@@ -1,0 +1,17 @@
+[toolchain]
+anchor_version = "0.32.1"
+solana_version = "2.3.0"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+tonari = "2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "node tests/chain-validator.cjs"
