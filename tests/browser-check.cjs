@@ -1,7 +1,7 @@
 const {chromium}=require(process.env.TONARI_PLAYWRIGHT || 'playwright');
 const assert=require('node:assert/strict');
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const launchOpts={headless:true,args:['--no-sandbox']}; if(process.env.TONARI_CHROME_PATH) launchOpts.executablePath=process.env.TONARI_CHROME_PATH; else launchOpts.channel='chrome'; const browser=await chromium.launch(launchOpts);
  const context=await browser.newContext({viewport:{width:1360,height:1180}});
  const page=await context.newPage(),errors=[],external=[];
  page.on('pageerror',e=>errors.push(e.message));
