@@ -1,6 +1,6 @@
 /** Bounded network retries; an online event is a hint, never the only trigger. */
 export class SettlementRetry {
- constructor({attempt,isPending,isOnline,isVisible=()=>true,setTimer=setTimeout,clearTimer=clearTimeout,delay=15000,initialDelay=2000,maxAttempts=3}){
+ constructor({attempt,isPending,isOnline,isVisible=()=>true,setTimer=(fn,ms)=>globalThis.setTimeout(fn,ms),clearTimer=id=>globalThis.clearTimeout(id),delay=15000,initialDelay=2000,maxAttempts=3}){
   Object.assign(this,{attempt,isPending,isOnline,isVisible,setTimer,clearTimer,delay,initialDelay,maxAttempts});this.timer=null;this.active=false;this.busy=false;this.attempts=0;this.blocked=false;
  }
  start(){this.active=true;this.arm(this.initialDelay);}
