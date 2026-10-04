@@ -24,7 +24,7 @@ const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright');const asse
    assert.deepEqual(await Promise.all(pages.map(p=>p.locator('#key').innerText())),keys);assert.equal(await c.locator('#phase').innerText(),'① 相手のQRを読む');
    // Actual same-origin DB state: each participant one receipt, third device zero.
    const receiptCounts=await Promise.all(pages.map((p,i)=>p.evaluate(async id=>{const {DeviceStore}=await import('/packages/protocol/storage.mjs');const s=await DeviceStore.open('phone-'+id);const rows=await s.receipts('22'.repeat(32));s.close();return rows.length;},i)));assert.deepEqual(receiptCounts,[1,1,0]);
-   await a.screenshot({path:'docs/qr-mobile-preview.png',fullPage:true});assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+   await a.screenshot({path:'docs/qr-mobile-preview.png',fullPage:true,animations:'disabled',timeout:120000});assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
    console.log(JSON.stringify({status:'PASS',image_qr_roundtrip:true,independent_keys:3,offline_exchange:true,pending_reload:true,completed_reload:true,third_device_unchanged:true,camera_denied_file_fallback:true,external_requests:0,page_errors:[],real_camera:false,physical_phones:false,chain_settlement:false}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

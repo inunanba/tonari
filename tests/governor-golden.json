@@ -1,0 +1,2490 @@
+{
+  "source_sha256": "c19d34dd7cc74f3baff675802b77927b7d0e20e24d8770404d460d7882468b9a",
+  "scope": "exact deterministic Python AST window recovery/early budget/post-allocation warning; not full simulator",
+  "vectors": [
+    {
+      "before": {
+        "effective": 0,
+        "hot": false,
+        "lastCut": -1000000000.0,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 0,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 0.5,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 1.5,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 2,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 2.5,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 6,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 26.4
+        },
+        "effectiveForFrame": 1.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 26.4
+      },
+      "input": {
+        "time": 12,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 90,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 0.0
+      },
+      "input": {
+        "time": 100,
+        "target": 0,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 0.0
+        },
+        "effectiveForFrame": 0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 0.5,
+        "hot": false,
+        "lastCut": -1000000000.0,
+        "windowBudget": 13.5
+      },
+      "input": {
+        "time": 0,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 13.5
+        },
+        "effectiveForFrame": 0.5,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 13.5
+      },
+      "input": {
+        "time": 0.5,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 13.5
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 13.5
+      },
+      "input": {
+        "time": 1.5,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 13.5
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 13.5
+      },
+      "input": {
+        "time": 2,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 13.5
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 13.5
+      },
+      "input": {
+        "time": 2.5,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 13.5
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 13.5
+      },
+      "input": {
+        "time": 6,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 26.4
+        },
+        "effectiveForFrame": 1.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 26.4
+      },
+      "input": {
+        "time": 12,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 0.5,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 12.9
+        },
+        "effectiveForFrame": 0.5,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 0.5,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 12.9
+      },
+      "input": {
+        "time": 90,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 0.5,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 9.0
+        },
+        "effectiveForFrame": 0.5,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 0.5,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 9.0
+      },
+      "input": {
+        "time": 100,
+        "target": 0.5,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 0.5,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 9.0
+        },
+        "effectiveForFrame": 0.5,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1,
+        "hot": false,
+        "lastCut": -1000000000.0,
+        "windowBudget": 27.0
+      },
+      "input": {
+        "time": 0,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 27.0
+        },
+        "effectiveForFrame": 1,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 27.0
+      },
+      "input": {
+        "time": 0.5,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 27.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 27.0
+      },
+      "input": {
+        "time": 1.5,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 27.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 27.0
+      },
+      "input": {
+        "time": 2,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 27.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 27.0
+      },
+      "input": {
+        "time": 2.5,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 27.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 27.0
+      },
+      "input": {
+        "time": 6,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 26.4
+        },
+        "effectiveForFrame": 1.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 26.4
+      },
+      "input": {
+        "time": 12,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 25.8
+        },
+        "effectiveForFrame": 1,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 25.8
+      },
+      "input": {
+        "time": 90,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 18.0
+        },
+        "effectiveForFrame": 1,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 18.0
+      },
+      "input": {
+        "time": 100,
+        "target": 1,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 18.0
+        },
+        "effectiveForFrame": 1,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2,
+        "hot": false,
+        "lastCut": -1000000000.0,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 0,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 54.0
+        },
+        "effectiveForFrame": 2,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 0.5,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 54.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 1.5,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 54.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 2,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 54.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 2.5,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 54.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 6,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 26.4
+        },
+        "effectiveForFrame": 1.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 26.4
+      },
+      "input": {
+        "time": 12,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 51.6
+        },
+        "effectiveForFrame": 2,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 51.6
+      },
+      "input": {
+        "time": 90,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 36.0
+        },
+        "effectiveForFrame": 2,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 36.0
+      },
+      "input": {
+        "time": 100,
+        "target": 2,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 36.0
+        },
+        "effectiveForFrame": 2,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 4,
+        "hot": false,
+        "lastCut": -1000000000.0,
+        "windowBudget": 108.0
+      },
+      "input": {
+        "time": 0,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 108.0
+        },
+        "effectiveForFrame": 4,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 108.0
+      },
+      "input": {
+        "time": 0.5,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 108.0
+        },
+        "effectiveForFrame": 2.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 108.0
+      },
+      "input": {
+        "time": 1.5,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 108.0
+        },
+        "effectiveForFrame": 2.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 108.0
+      },
+      "input": {
+        "time": 2,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 108.0
+        },
+        "effectiveForFrame": 2.0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 108.0
+      },
+      "input": {
+        "time": 2.5,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 108.0
+        },
+        "effectiveForFrame": 1.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 108.0
+      },
+      "input": {
+        "time": 6,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 1.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 26.4
+        },
+        "effectiveForFrame": 1.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 1.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 26.4
+      },
+      "input": {
+        "time": 12,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 51.6
+        },
+        "effectiveForFrame": 2.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 51.6
+      },
+      "input": {
+        "time": 90,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 3.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 54.0
+        },
+        "effectiveForFrame": 3.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 3.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 54.0
+      },
+      "input": {
+        "time": 100,
+        "target": 4,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 4,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 72.0
+        },
+        "effectiveForFrame": 4,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 8,
+        "hot": false,
+        "lastCut": -1000000000.0,
+        "windowBudget": 216.0
+      },
+      "input": {
+        "time": 0,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 4.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 216.0
+        },
+        "effectiveForFrame": 8,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 4.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 216.0
+      },
+      "input": {
+        "time": 0.5,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 4.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 216.0
+        },
+        "effectiveForFrame": 4.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 4.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 216.0
+      },
+      "input": {
+        "time": 1.5,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 4.0,
+          "hot": true,
+          "lastCut": 0,
+          "windowBudget": 216.0
+        },
+        "effectiveForFrame": 4.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 4.0,
+        "hot": true,
+        "lastCut": 0,
+        "windowBudget": 216.0
+      },
+      "input": {
+        "time": 2,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 216.0
+        },
+        "effectiveForFrame": 4.0,
+        "warning": true,
+        "cut": true
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 216.0
+      },
+      "input": {
+        "time": 2.5,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          8,
+          0,
+          0,
+          0
+        ],
+        "boundary": false,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": true,
+          "lastCut": 2,
+          "windowBudget": 216.0
+        },
+        "effectiveForFrame": 2.0,
+        "warning": true,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": true,
+        "lastCut": 2,
+        "windowBudget": 216.0
+      },
+      "input": {
+        "time": 6,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 2.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 52.8
+        },
+        "effectiveForFrame": 2.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 2.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 52.8
+      },
+      "input": {
+        "time": 12,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 3.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 77.39999999999999
+        },
+        "effectiveForFrame": 3.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 3.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 77.39999999999999
+      },
+      "input": {
+        "time": 90,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 4.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 72.0
+        },
+        "effectiveForFrame": 4.0,
+        "warning": false,
+        "cut": false
+      }
+    },
+    {
+      "before": {
+        "effective": 4.0,
+        "hot": false,
+        "lastCut": 2,
+        "windowBudget": 72.0
+      },
+      "input": {
+        "time": 100,
+        "target": 8,
+        "waits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "induced10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "boundary": true,
+        "windowMinutes": 6,
+        "early": true
+      },
+      "expected": {
+        "state": {
+          "effective": 5.0,
+          "hot": false,
+          "lastCut": 2,
+          "windowBudget": 90.0
+        },
+        "effectiveForFrame": 5.0,
+        "warning": false,
+        "cut": false
+      }
+    }
+  ]
+}
