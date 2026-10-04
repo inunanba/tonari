@@ -1,5 +1,6 @@
 import {createDevice,inspectPacket,inspectOffer,fromHex,hex,signOffer,encodeOffer} from './swap.mjs';
 import {checkReceipt} from './ledger.mjs';
+import {ExchangeStore} from './storage-v2.mjs';
 
 /** Browser-local store. Crypto completes BEFORE opening the write transaction. */
 export class DeviceStore {
@@ -9,8 +10,8 @@ export class DeviceStore {
     if(!/^(client|phone)-[012]$/.test(namespace)) throw new Error('BAD_NAMESPACE');
     if(!globalThis.indexedDB) throw new Error('STORAGE_UNAVAILABLE');
     const db=await new Promise((resolve,reject)=>{
-      const r=indexedDB.open(`tonari-v1-${namespace}`,1);
-      r.onupgradeneeded=()=>{r.result.createObjectStore('identity');r.result.createObjectStore('receipts',{keyPath:'id'});r.result.createObjectStore('intents');};
+      const r=indexedDB.open(`tonari-v1-${namespace}`,2);
+      r.onupgradeneeded=()=>{for(const name of ['identity','receipts','intents','v2states','v2receipts','v2intents','v2settings'])if(!r.result.objectStoreNames.contains(name))r.result.createObjectStore(name,['receipts','v2receipts'].includes(name)?{keyPath:'id'}:undefined);};
       r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
       r.onblocked=()=>reject(new Error('STORAGE_BLOCKED'));
     });
@@ -29,6 +30,7 @@ export class DeviceStore {
     return new DeviceStore(db,device);
   }
   get device() {return this.#device;}
+  get exchange() {return new ExchangeStore(this.#db,this.#device);}
   close() {this.#db.close();}
   #read(store,method,key) {
     return new Promise((resolve,reject)=>{
