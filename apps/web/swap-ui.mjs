@@ -3,18 +3,21 @@ import {hex,fromHex} from '../../packages/protocol/swap.mjs';
 import {signOffer,inspectOffer,acceptOffer,decodeOffer,BODY_BYTES} from '../../packages/protocol/swap-v2.mjs';
 import {publicKeyWire,signedOfferWire,encodeWire,decodeWire,readSignedOfferWire,readReceiptWire} from '../../packages/protocol/wire-v2.mjs';
 import {checkOwned} from '../../packages/protocol/attestation.mjs';
-import {chainAPI,validateConfig,joinMessage,settlementPresentation} from './chain-api.mjs';
+import {chainAPI,validateConfig,joinMessage,settlementPresentation,connectionNotice} from './chain-api.mjs';
 import {qrRaster} from '../../packages/protocol/qr.mjs';
 import {CameraReader,readQRFile} from './camera.mjs';
 import {prepareOffline} from './offline.mjs';
 import {observedNow,offerTime} from '../../packages/protocol/observed-clock.mjs';
+import {ActionQueue} from './action-queue.mjs';
 import {SettlementRetry} from './settlement-retry.mjs';
 const $=s=>document.querySelector(s),params=new URL(location.href).searchParams,client=params.has('client')?Number(params.get('client')):0;
 if(![0,1,2].includes(client))throw Error('BAD_CLIENT');
 const wallNow=()=>Math.floor(Date.now()/1000),now=()=>observedNow(anchor,wallNow()),number=id=>parseInt(id.slice(0,2),16)+1;
-let root,store,device,config,state,anchor,sent,pending,receipt,busy=false,settling=false;
+let root,store,device,config,state,anchor,sent,pending,receipt,settling=false;
+const actions=new ActionQueue({onChange:count=>{document.documentElement.dataset.actionState=count?'busy':'idle';document.documentElement.dataset.actionCount=String(count);}});
+document.documentElement.dataset.actionState='idle';
 const camera=new CameraReader($('#video'));
-const fail=e=>{const text={OWNERSHIP_OBSERVATION_EXPIRED:'通信を戻し、所有権を更新してから交換を頼んでください。',CLOCK_ANCHOR_UNAVAILABLE:'通信を戻し、所有権を更新してください。',LOCAL_CLOCK_ROLLBACK:'端末の時計を確かめ、通信を戻して所有権を更新してください。'};$('#status').textContent='確認できませんでした：'+(text[e.message]||e.message);};
+const fail=e=>{const text={ACTION_CONTEXT_CHANGED:'交換の内容が変わりました。もう一度内容を確かめてください。',ACTION_QUEUE_FULL:'処理が終わるのを待って、QRをもう一度選んでください。',OWNERSHIP_OBSERVATION_EXPIRED:'通信を戻し、所有権を更新してから交換を頼んでください。',CLOCK_ANCHOR_UNAVAILABLE:'通信を戻し、所有権を更新してください。',LOCAL_CLOCK_ROLLBACK:'端末の時計を確かめ、通信を戻して所有権を更新してください。'};$('#status').textContent='確認できませんでした：'+(text[e.message]||e.message);};
 const retryable=e=>e instanceof TypeError||['AbortError','TimeoutError'].includes(e.name)||e.message==='CHAIN_SERVICE_UNAVAILABLE';
 const sync=new SettlementRetry({attempt:settle,isPending:()=>!!config&&!!receipt&&!receipt.ownershipFinal,isOnline:()=>navigator.onLine,isVisible:()=>!document.hidden});
 function draw(text,label){const r=qrRaster(text),c=$('#qr');c.hidden=false;c.width=r.width;c.height=r.height;c.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);$('#qr-label').textContent=label;}
@@ -49,7 +52,7 @@ async function settle(){if(!receipt||receipt.ownershipFinal||settling)return;set
  try{const envelope=await chainAPI('settle',{packet:receipt.packet});const next=await store.confirm(receipt.id,envelope,config);complete(next);try{await refresh();}catch{$('#chain-status').textContent='交換は確定済みです。所有するピースの更新は再接続時に続けます。';}return {done:true};}
  catch(e){$('#chain-status').textContent='仮受け取りは保存されています。確定を再試行できます：'+e.message;return {done:false,retryable:retryable(e)};}finally{settling=false;$('#settle').disabled=receipt.ownershipFinal===true;}
 }
-async function read(text){if(busy||receipt)return;busy=true;try{
+function read(text){return actions.run(async()=>{if(receipt)throw Error('この交換はすでに保存されています。');
  const data=decodeWire(text);
  if(data.type==='K'){
   if(sent||pending)throw Error('いまの交換を完了してください。');const b=hex(data.bytes);if(b===device.publicKey)throw Error('自分のQRです。');
@@ -68,11 +71,12 @@ async function read(text){if(busy||receipt)return;busy=true;try{
    const proof=await chainAPI('settle',{packet:hex(packet)});complete(await store.receive(packet,config,now(),proof));
   }
  }
-}finally{busy=false;}}
-async function cancel(){if(busy)return;busy=true;try{await store.saveIntent(config,null);sent=null;pending=null;$('#cancel').hidden=true;$('#review').hidden=true;picks();$('#status').textContent='交換しない選択も大丈夫です。';}catch(e){fail(e);}finally{busy=false;}}
+});}
+function cancel(){return actions.run(async()=>{if(receipt)throw Error('この交換はすでに保存されています。');await store.saveIntent(config,null);sent=null;pending=null;$('#cancel').hidden=true;$('#review').hidden=true;picks();$('#status').textContent='交換しない選択も大丈夫です。';}).catch(fail);}
 try{
  root=await DeviceStore.open('phone-'+client);store=root.exchange;device=root.device;$('#key').textContent='この端末の公開鍵 '+device.publicKey.slice(0,20)+'…';
  const cached=await store.config();try{config=validateConfig(await chainAPI('config'));}catch(e){if(!cached)throw e;config=validateConfig(cached);}
+ $('#connection-notice').textContent=connectionNotice(config);
  await store.saveConfig(config);state=await store.state(config);
  if(navigator.onLine)try{const proof=hex(new Uint8Array(await crypto.subtle.sign('Ed25519',device.privateKey,joinMessage(config,client,device.publicKey))));state=await store.saveState(await chainAPI('join',{client,publicKey:device.publicKey,proof}),config);}catch(e){if(!state)throw e;}
  if(!state)throw Error('STATE_UNAVAILABLE');
@@ -89,13 +93,13 @@ try{
  }
  document.documentElement.dataset.chainReady='true';
 }catch(e){$('#phase').textContent='確定接続の準備待ち';fail(e);$('#reader').hidden=true;$('#pick').hidden=true;}
-$('#confirm').addEventListener('click',async()=>{if(!pending||busy)return;busy=true;$('#confirm').disabled=true;try{const p=await acceptOffer(device,pending.signed,{...config,now:now()});complete(await store.receive(p,config,now()));}catch(e){fail(e);}finally{busy=false;$('#confirm').disabled=false;}});
+$('#confirm').addEventListener('click',()=>actions.runCurrent(pending?.signed.body,()=>pending?.signed.body,async()=>{if(!pending)throw Error('交換の内容を先に確かめてください。');$('#confirm').disabled=true;try{const p=await acceptOffer(device,pending.signed,{...config,now:now()});complete(await store.receive(p,config,now()));}finally{$('#confirm').disabled=false;}}).catch(fail));
 $('#decline').addEventListener('click',cancel);$('#cancel').addEventListener('click',cancel);
-$('#refresh').addEventListener('click',async()=>{if(busy||receipt)return;busy=true;try{await refresh();picks();}catch(e){fail(e);}finally{busy=false;}});
+$('#refresh').addEventListener('click',()=>actions.run(async()=>{if(receipt)return;await refresh();if(!sent&&!pending)picks();}).catch(fail));
 $('#settle').addEventListener('click',()=>sync.request(true));window.addEventListener('online',()=>sync.request(false));
 window.addEventListener('focus',()=>sync.request(false));window.addEventListener('pageshow',()=>sync.start());
 $('#image').addEventListener('change',async()=>{camera.stop();if(!device||receipt)return;try{await read(await readQRFile($('#image').files[0]));}catch(e){fail(e);}finally{$('#image').value='';$('#stop').hidden=true;}});
-$('#scan').addEventListener('click',async()=>{if(!device||receipt||busy)return;$('#scan').disabled=true;$('#stop').hidden=false;try{await camera.start(async text=>{await read(text);$('#scan').disabled=!!receipt;$('#stop').hidden=true;},e=>{fail(e);$('#scan').disabled=!!receipt;$('#stop').hidden=true;});}catch(e){fail(e);$('#scan').disabled=false;$('#stop').hidden=true;}});
+$('#scan').addEventListener('click',async()=>{if(!device||receipt)return;$('#scan').disabled=true;$('#stop').hidden=false;try{await camera.start(async text=>{await read(text);$('#scan').disabled=!!receipt;$('#stop').hidden=true;},e=>{fail(e);$('#scan').disabled=!!receipt;$('#stop').hidden=true;});}catch(e){fail(e);$('#scan').disabled=false;$('#stop').hidden=true;}});
 $('#stop').addEventListener('click',()=>{camera.stop();$('#stop').hidden=true;$('#scan').disabled=!!receipt;});
 window.addEventListener('pagehide',()=>{camera.stop();sync.stop();});document.addEventListener('visibilitychange',()=>{if(document.hidden)camera.stop();else sync.request(false);});
 prepareOffline().then(()=>{$('#offline-status').textContent='通信なしで開き直せます。';document.documentElement.dataset.offlineReady='true';}).catch(e=>{$('#offline-status').textContent='通信なしの再起動は準備できませんでした：'+e.message;});

@@ -18,3 +18,7 @@ export function settlementPresentation(config,signature){
  if(!/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(signature))throw Error('BAD_TRANSACTION_SIGNATURE');
  return config.cluster==='devnet'?{label:'Devnet取引 '+signature,url:'https://explorer.solana.com/tx/'+signature+'?cluster=devnet',status:'Solana Devnetの確定済み記録です。'}:{label:'ローカル取引 '+signature,url:null,status:'ローカル検証の確定済み記録です。'};
 }
+
+export function connectionNotice(config){
+ validateConfig(config);return config.cluster==='devnet'?'Solana Devnetで開発検証しています。実際のお金は使いません。審査員向けの常設接続は制作中です。':'この画面はローカルチェーンで開発検証しています。公開Devnetの取引ではありません。';
+}

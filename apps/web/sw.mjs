@@ -1,6 +1,6 @@
-const VERSION='tonari-shell-v0.7.4';
+const VERSION='tonari-shell-v0.7.5';
 const assets=['../../packages/protocol/wire-v2.mjs','../../packages/protocol/swap-v2.mjs','./kawaii.css','./mascots.mjs','./index.html','./phone.html','./exchange.html','./operations.html','./style.css','./phone.css','./exchange.css','./operations.css','./stage.mjs','./phone.mjs','./exchange.mjs','./camera.mjs','./operations.mjs','./offline.mjs','../../packages/protocol/swap.mjs','../../packages/protocol/ledger.mjs','../../packages/protocol/storage.mjs','../../packages/protocol/wire.mjs','../../packages/protocol/qr.mjs','../../packages/protocol/allocator.mjs','../../vendor/qrcodegen.mjs','../../vendor/jsqr.mjs'];
-assets.push('../../packages/protocol/observed-clock.mjs','./swap.html','./swap-ui.mjs','./chain-api.mjs','./settlement-retry.mjs','../../packages/protocol/storage-v2.mjs','../../packages/protocol/attestation.mjs');
+assets.push('./action-queue.mjs','../../packages/protocol/observed-clock.mjs','./swap.html','./swap-ui.mjs','./chain-api.mjs','./settlement-retry.mjs','../../packages/protocol/storage-v2.mjs','../../packages/protocol/attestation.mjs');
 const urls=assets.map(p=>new URL(p,self.location.href).href);
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(VERSION);await cache.addAll(urls);await self.skipWaiting();
