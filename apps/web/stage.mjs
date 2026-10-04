@@ -1,5 +1,7 @@
+import {prepareOffline} from './offline.mjs';
 const frames=[...document.querySelectorAll('iframe')], registry=new Map();
 const status=document.querySelector('#proof-status');
+prepareOffline().then(()=>{document.querySelector('#offline-status').textContent='通信なしで開き直す準備ができました。';document.documentElement.dataset.offlineReady='true';}).catch(e=>{document.querySelector('#offline-status').textContent='通信なしでの再起動は準備できませんでした：'+e.message;});
 window.addEventListener('message',event=>{
   if(event.origin!==location.origin) return;
   const index=frames.findIndex(f=>f.contentWindow===event.source); if(index<0) return;
