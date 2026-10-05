@@ -2,6 +2,8 @@
 
 Status: **DRAFT / NOT RECORDED / NOT SUBMITTED**. Hard cap: 2:00. This cut shows evidence, not a feature montage.
 
+Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:00, but this stronger cut stays at 2:00.
+
 | Time | Action | Evidence on screen | Spoken point |
 |---|---|---|---|
 | 0:00–0:16 | Open three independent clients and show distinct public keys. Toggle DevTools offline before the exchange. | Three namespaces and keys; offline indicator. | Browser-native Ed25519 identities; no wallet, login or runtime CDN. |
@@ -19,4 +21,4 @@ Status: **DRAFT / NOT RECORDED / NOT SUBMITTED**. Hard cap: 2:00. This cut shows
 - Do not paste private keys, operator state, local paths, notifications or authenticated tabs.
 - The test count in narration must equal the tested commit. If R2i changes it, update the line before rendering.
 - Return: two-minute-or-less MP4, SHA-256, public URL, captured public commit, browser version and a list of cuts.
-- Add the final credit `VOICEVOX:<verified voice name>` if narration is used.
+- Add `VOICEVOX:四国めたん` in-video and in the description if the verified voice is used; recheck its terms at render time.
