@@ -13,6 +13,7 @@ const {Connection,Keypair,PublicKey,sendAndConfirmTransaction,TransactionInstruc
  const airdrop=await c.requestAirdrop(payer.publicKey,5e9);await c.confirmTransaction(airdrop,'confirmed');
  async function send(ix,signers=[payer]){const bh=(await c.getLatestBlockhash()).blockhash;const tx=client.transaction(payer.publicKey,bh,ix);assert(client.serializedSize(tx)<=1232,'TX_TOO_LARGE');return sendAndConfirmTransaction(c,tx,signers,{commitment:'confirmed',skipPreflight:false});}
  async function clock(){const slot=await c.getSlot();const now=await c.getBlockTime(slot);assert(Number.isInteger(now),'CLOCK_UNAVAILABLE');return now;}
+ async function waitForClock(target){for(let i=0;i<30;i++){if(await clock()>=target)return;await new Promise(r=>setTimeout(r,250));}throw Error('CLOCK_WAIT_TIMEOUT');}
  async function show(cap=24){const seed=randomBytes(32),key=client.showAddress(seed),deadline=(await clock())+1800;await send([client.createShow(payer.publicKey,seed,deadline,cap)]);const s=client.readAccount(await c.getAccountInfo(key),'Show');assert.equal(hex(s.policy),hex(client.policyHash(key,deadline,cap)));return {key,deadline,policy:hex(s.policy)};}
  async function player(s){const k=Keypair.generate(),id=randomBytes(32);await send([client.registerTicket(payer.publicKey,s.key,k.publicKey)]);await send([client.issueTile(payer.publicKey,s.key,k.publicKey,id)]);return {k,id};}
  const signature=(k,msg)=>sign(null,Buffer.from(msg),createPrivateKey({key:Buffer.concat([Buffer.from('302e020100300506032b657004220420','hex'),Buffer.from(k.secretKey.subarray(0,32))]),format:'der',type:'pkcs8'}));
@@ -41,6 +42,17 @@ const {Connection,Keypair,PublicKey,sendAndConfirmTransaction,TransactionInstruc
  }
  async function accepted(name,instructions){const tx=await send(instructions);results.push({name,status:'PASS',tx});return tx;}
  const s=await show(),a=await player(s),b=await player(s),d=await player(s),e=await player(s);
+ const claimWindow=7,checkpoint=Keypair.generate().publicKey,secret=randomBytes(32),claimNow=await clock(),validFrom=claimNow+1,validTo=claimNow+3,revealAfter=claimNow+4,commitment=client.dropRevealHash(s.key,Buffer.from(s.policy,'hex'),claimWindow,secret),windowKey=client.claimWindowAddress(s.key,claimWindow);
+ await accepted('immutable claim window commitment',[client.commitClaimWindow(payer.publicKey,s.key,{window:claimWindow,checkpointKey:checkpoint,entropyCommitment:commitment,validFrom,validTo,revealAfter,probabilityPPM:500000,cap:3})]);
+ let windowState=client.readAccount(await c.getAccountInfo(windowKey),'ClaimWindow');assert.equal(windowState.window,claimWindow);assert(windowState.checkpointKey.equals(checkpoint));assert.equal(windowState.rootPosted,false);assert.equal(windowState.revealed,false);
+ const root=randomBytes(32);await rejected('claims root cannot post before window closes',[client.postClaimsRoot(payer.publicKey,s.key,claimWindow,root,2)],/Window|0x177a/);
+ await waitForClock(validTo);await rejected('claims root count cannot exceed committed cap',[client.postClaimsRoot(payer.publicKey,s.key,claimWindow,root,4)],/ClaimCap|0x177f/);
+ await accepted('claims root posts once within committed cap',[client.postClaimsRoot(payer.publicKey,s.key,claimWindow,root,2)]);
+ windowState=client.readAccount(await c.getAccountInfo(windowKey),'ClaimWindow');assert(windowState.claimsRoot.equals(root));assert.equal(windowState.claimCount,2);assert.equal(windowState.rootPosted,true);
+ await rejected('claims root cannot be replaced',[client.postClaimsRoot(payer.publicKey,s.key,claimWindow,randomBytes(32),1)],/AlreadyPosted|0x177d/);
+ await waitForClock(revealAfter);await rejected('wrong reveal secret cannot open commitment',[client.revealClaimWindow(payer.publicKey,s.key,claimWindow,randomBytes(32))],/Commitment|0x177b/);
+ await accepted('delayed reveal opens exact scoped commitment',[client.revealClaimWindow(payer.publicKey,s.key,claimWindow,secret)]);
+ windowState=client.readAccount(await c.getAccountInfo(windowKey),'ClaimWindow');assert(windowState.revealedSecret.equals(secret));assert.equal(windowState.revealed,true);await rejected('claim window cannot be revealed twice',[client.revealClaimWindow(payer.publicKey,s.key,claimWindow,secret)],/AlreadyRevealed|0x177e/);
  const p=await packet(s,a,b),good=await ix(p);
  const badsig=await ix(p);badsig[0].data[48]^=1;await rejected('invalid real Ed25519 signature',badsig,undefined,{precompileInvalid:true});
  const trailing=await ix(p);trailing[0].data=Buffer.concat([trailing[0].data,Buffer.from([0])]);await rejected('valid native signature with noncanonical trailing data',trailing,/Binding|0x1771/);

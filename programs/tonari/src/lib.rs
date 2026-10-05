@@ -10,6 +10,7 @@ mod ownership;
 mod signature_binding;
 declare_id!("2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA");
 const ACCEPT: &[u8] = b"TONARI/v2/swap-accept\0";
+const DROP_REVEAL: &[u8] = b"TONARI/v2/drop-reveal\0";
 #[program]
 pub mod tonari {
     use super::*;
@@ -24,7 +25,7 @@ pub mod tonari {
             deadline > now && u64::from(deadline) <= u64::from(now) + 604800,
             ErrorCode::Deadline
         );
-        require!(cap > 0 && cap <= 24, ErrorCode::Cap);
+        require!(cap > 0 && cap <= 65_535, ErrorCode::ClaimCap);
         let key = ctx.accounts.show.key();
         let s = &mut ctx.accounts.show;
         s.seed = seed;
@@ -63,6 +64,83 @@ pub mod tonari {
     }
     pub fn pause_show(ctx: Context<PauseShow>, paused: bool) -> Result<()> {
         ctx.accounts.show.paused = paused;
+        Ok(())
+    }
+    pub fn commit_claim_window(
+        ctx: Context<CommitClaimWindow>,
+        window: u32,
+        checkpoint_key: Pubkey,
+        entropy_commitment: [u8; 32],
+        valid_from: u32,
+        valid_to: u32,
+        reveal_after: u32,
+        probability_ppm: u32,
+        cap: u32,
+    ) -> Result<()> {
+        let now = chain_time()?;
+        require!(!ctx.accounts.show.paused, ErrorCode::Paused);
+        require!(checkpoint_key != Pubkey::default(), ErrorCode::Commitment);
+        require!(entropy_commitment != [0; 32], ErrorCode::Commitment);
+        require!(valid_from >= now && valid_to >= valid_from, ErrorCode::Window);
+        require!(reveal_after >= valid_to && reveal_after <= ctx.accounts.show.deadline, ErrorCode::Window);
+        require!(probability_ppm <= 1_000_000, ErrorCode::Probability);
+        require!(cap > 0 && cap <= 24, ErrorCode::Cap);
+        let w = &mut ctx.accounts.claim_window;
+        w.show = ctx.accounts.show.key();
+        w.policy = ctx.accounts.show.policy;
+        w.checkpoint_key = checkpoint_key;
+        w.entropy_commitment = entropy_commitment;
+        w.claims_root = [0; 32];
+        w.revealed_secret = [0; 32];
+        w.window = window;
+        w.valid_from = valid_from;
+        w.valid_to = valid_to;
+        w.reveal_after = reveal_after;
+        w.probability_ppm = probability_ppm;
+        w.cap = cap;
+        w.claim_count = 0;
+        w.root_posted_at = 0;
+        w.revealed_at = 0;
+        w.root_posted = false;
+        w.revealed = false;
+        w.bump = ctx.bumps.claim_window;
+        Ok(())
+    }
+    pub fn post_claims_root(
+        ctx: Context<UpdateClaimWindow>,
+        _window: u32,
+        claims_root: [u8; 32],
+        claim_count: u32,
+    ) -> Result<()> {
+        let now = chain_time()?;
+        let w = &mut ctx.accounts.claim_window;
+        require!(!ctx.accounts.show.paused, ErrorCode::Paused);
+        require!(!w.root_posted, ErrorCode::AlreadyPosted);
+        require!(now >= w.valid_to, ErrorCode::Window);
+        require!(claims_root != [0; 32], ErrorCode::Commitment);
+        require!(claim_count <= w.cap, ErrorCode::ClaimCap);
+        w.claims_root = claims_root;
+        w.claim_count = claim_count;
+        w.root_posted_at = now;
+        w.root_posted = true;
+        Ok(())
+    }
+    pub fn reveal_claim_window(
+        ctx: Context<UpdateClaimWindow>,
+        _window: u32,
+        secret: [u8; 32],
+    ) -> Result<()> {
+        let now = chain_time()?;
+        let w = &mut ctx.accounts.claim_window;
+        require!(!w.revealed, ErrorCode::AlreadyRevealed);
+        require!(w.root_posted && now >= w.reveal_after, ErrorCode::Window);
+        require!(
+            drop_reveal_hash(w.show, w.policy, w.window, secret) == w.entropy_commitment,
+            ErrorCode::Commitment
+        );
+        w.revealed_secret = secret;
+        w.revealed_at = now;
+        w.revealed = true;
         Ok(())
     }
     pub fn settle_swap(ctx: Context<SettleSwap>, nonce: [u8; 16]) -> Result<()> {
@@ -205,6 +283,9 @@ pub fn pair_hash(a: Pubkey, b: Pubkey) -> [u8; 32] {
     };
     hashv(&[lo.as_ref(), hi.as_ref()]).to_bytes()
 }
+pub fn drop_reveal_hash(show: Pubkey, policy: [u8; 32], window: u32, secret: [u8; 32]) -> [u8; 32] {
+    hashv(&[DROP_REVEAL, show.as_ref(), &policy, &window.to_le_bytes(), &secret]).to_bytes()
+}
 #[derive(Accounts)]
 #[instruction(seed:[u8;32])]
 pub struct CreateShow<'info> {
@@ -243,6 +324,26 @@ pub struct PauseShow<'info> {
     pub authority: Signer<'info>,
     #[account(mut,seeds=[b"show",show.seed.as_ref()],bump=show.bump,has_one=authority)]
     pub show: Account<'info, Show>,
+}
+#[derive(Accounts)]
+#[instruction(window:u32)]
+pub struct CommitClaimWindow<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(seeds=[b"show",show.seed.as_ref()],bump=show.bump,has_one=authority)]
+    pub show: Account<'info, Show>,
+    #[account(init,payer=authority,space=8+ClaimWindow::INIT_SPACE,seeds=[b"claim-window",show.key().as_ref(),window.to_le_bytes().as_ref()],bump)]
+    pub claim_window: Account<'info, ClaimWindow>,
+    pub system_program: Program<'info, System>,
+}
+#[derive(Accounts)]
+#[instruction(window:u32)]
+pub struct UpdateClaimWindow<'info> {
+    pub authority: Signer<'info>,
+    #[account(seeds=[b"show",show.seed.as_ref()],bump=show.bump,has_one=authority)]
+    pub show: Account<'info, Show>,
+    #[account(mut,seeds=[b"claim-window",show.key().as_ref(),window.to_le_bytes().as_ref()],bump=claim_window.bump,has_one=show,constraint=claim_window.policy==show.policy @ ErrorCode::Commitment)]
+    pub claim_window: Account<'info, ClaimWindow>,
 }
 #[derive(Accounts)]
 #[instruction(nonce:[u8;16])]
@@ -305,6 +406,28 @@ pub struct Marker {
     pub packet_hash: [u8; 32],
     pub settled_at: u32,
 }
+#[account]
+#[derive(InitSpace)]
+pub struct ClaimWindow {
+    pub show: Pubkey,
+    pub policy: [u8; 32],
+    pub checkpoint_key: Pubkey,
+    pub entropy_commitment: [u8; 32],
+    pub claims_root: [u8; 32],
+    pub revealed_secret: [u8; 32],
+    pub window: u32,
+    pub valid_from: u32,
+    pub valid_to: u32,
+    pub reveal_after: u32,
+    pub probability_ppm: u32,
+    pub cap: u32,
+    pub claim_count: u32,
+    pub root_posted_at: u32,
+    pub revealed_at: u32,
+    pub root_posted: bool,
+    pub revealed: bool,
+    pub bump: u8,
+}
 #[event]
 pub struct SwapSettled {
     pub packet_hash: [u8; 32],
@@ -337,6 +460,18 @@ pub enum ErrorCode {
     Paused,
     #[msg("Duplicate account")]
     Alias,
+    #[msg("Invalid claim window")]
+    Window,
+    #[msg("Invalid commitment")]
+    Commitment,
+    #[msg("Invalid probability")]
+    Probability,
+    #[msg("Claims root already posted")]
+    AlreadyPosted,
+    #[msg("Claim window already revealed")]
+    AlreadyRevealed,
+    #[msg("Claim count exceeds committed window cap")]
+    ClaimCap,
 }
 #[cfg(test)]
 mod account_tests {
@@ -347,6 +482,7 @@ mod account_tests {
         assert_eq!(8 + Ticket::INIT_SPACE, 83);
         assert_eq!(8 + Tile::INIT_SPACE, 109);
         assert_eq!(8 + Marker::INIT_SPACE, 44);
+        assert_eq!(8 + ClaimWindow::INIT_SPACE, 239);
         assert_eq!(
             policy_hash(Pubkey::new_from_array([9; 32]), 2000, 24),
             [
@@ -365,5 +501,24 @@ mod account_tests {
             pair_hash(a, b),
             pair_hash(a, Pubkey::new_from_array([3; 32]))
         );
+    }
+    #[test]
+    fn reveal_commitment_binds_every_scope_field() {
+        let show = Pubkey::new_from_array([7; 32]);
+        let policy = [8; 32];
+        let secret = [9; 32];
+        let expected = drop_reveal_hash(show, policy, 4, secret);
+        assert_eq!(
+            expected,
+            [
+                0x42, 0xae, 0x91, 0x20, 0x73, 0xb0, 0x5e, 0x90, 0xd3, 0x95, 0x62, 0x9a, 0x86, 0xa0,
+                0x96, 0x4c, 0x6c, 0x39, 0x3e, 0x7a, 0x92, 0x21, 0x1c, 0x45, 0xb8, 0x6b, 0x3d, 0x85,
+                0x33, 0x70, 0x68, 0xbf
+            ]
+        );
+        assert_ne!(expected, drop_reveal_hash(show, policy, 5, secret));
+        assert_ne!(expected, drop_reveal_hash(show, [6; 32], 4, secret));
+        assert_ne!(expected, drop_reveal_hash(Pubkey::new_from_array([6; 32]), policy, 4, secret));
+        assert_ne!(expected, drop_reveal_hash(show, policy, 4, [5; 32]));
     }
 }
