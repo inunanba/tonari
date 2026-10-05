@@ -10,6 +10,7 @@ import {prepareOffline} from './offline.mjs';
 import {observedNow,offerTime} from '../../packages/protocol/observed-clock.mjs';
 import {ActionQueue} from './action-queue.mjs';
 import {SettlementRetry} from './settlement-retry.mjs';
+import {ownershipView} from '../../packages/protocol/ownership-view.mjs';
 const $=s=>document.querySelector(s),params=new URL(location.href).searchParams,client=params.has('client')?Number(params.get('client')):0;
 if(![0,1,2].includes(client))throw Error('BAD_CLIENT');
 const wallNow=()=>Math.floor(Date.now()/1000),now=()=>observedNow(anchor,wallNow()),number=id=>parseInt(id.slice(0,2),16)+1;
@@ -21,13 +22,28 @@ const fail=e=>{const text={ACTION_CONTEXT_CHANGED:'交換の内容が変わり�
 const retryable=e=>e instanceof TypeError||['AbortError','TimeoutError'].includes(e.name)||e.message==='CHAIN_SERVICE_UNAVAILABLE';
 const sync=new SettlementRetry({attempt:settle,isPending:()=>!!config&&!!receipt&&!receipt.ownershipFinal,isOnline:()=>navigator.onLine,isVisible:()=>!document.hidden});
 function draw(text,label){const r=qrRaster(text),c=$('#qr');c.hidden=false;c.width=r.width;c.height=r.height;c.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);$('#qr-label').textContent=label;}
+function renderOwnership(){
+ const view=ownershipView(state,device.publicKey),board=$('#ownership-board');board.replaceChildren();
+ for(const cell of view.cells){const node=document.createElement('span');node.className='tile'+(cell.owned?' owned':cell.issued?'':' unissued');node.dataset.tile=String(cell.index);if(cell.issued)node.dataset.version=String(cell.version);node.textContent=cell.owned?'◇':cell.issued?'·':'−';node.title=cell.issued?`ピース ${cell.number} · 所有権 ${cell.version}`:`ピース ${cell.number} · まだ発行されていません`;board.append(node);}
+ $('#ownership-count').textContent=`${view.owned}枚所有・${view.issued}/${view.total}枚発行`;$('#ownership-status').textContent=`確定済み状態・スロット ${state.slot}。未発行の枠は所有として数えません。`;$('#ownership').hidden=false;
+}
 function picks(){
  for(const name of ['give','want']){$('#'+name).replaceChildren();for(const tile of state.tiles.filter(t=>name==='give'?t.owner===device.publicKey:t.owner!==device.publicKey)){
   const o=document.createElement('option');o.value=tile.id;o.textContent='ピース '+number(tile.id)+' · 所有権 '+tile.version;$('#'+name).append(o);
  }}
  $('#pick').hidden=false;$('#reader').hidden=false;$('#scan').disabled=false;draw(publicKeyWire(device.publicKey),'交換を頼むひとに、このQRを見せてください。');$('#phase').textContent='① 相手のQRを読む';$('#status').textContent='所有権を確認してから、一枚ずつ交換します。';
 }
-async function refresh(){state=await store.saveState(await chainAPI('state'),config);anchor=await store.clockAnchor(config);return state;}
+async function refresh(){state=await store.saveState(await chainAPI('state'),config);anchor=await store.clockAnchor(config);renderOwnership();return state;}
+async function convergeInitialOwnership(){
+ // The judge show issues three tiles to each of its three fixed clients. Join
+ // responses are serialized, so an early participant can otherwise render a
+ // valid but stale 3/6-tile snapshot until somebody presses refresh.
+ if(!navigator.onLine||state.tiles.length>=9)return;
+ for(let attempt=0;attempt<120&&state.tiles.length<9;attempt++){
+  await new Promise(resolve=>setTimeout(resolve,500));
+  try{await refresh();}catch(e){if(!retryable(e))throw e;break;}
+ }
+}
 async function refreshWhenAvailable(){
  if(!navigator.onLine)return;
  try{await refresh();}catch(e){
@@ -79,7 +95,7 @@ try{
  $('#connection-notice').textContent=connectionNotice(config);
  await store.saveConfig(config);state=await store.state(config);
  if(navigator.onLine)try{const proof=hex(new Uint8Array(await crypto.subtle.sign('Ed25519',device.privateKey,joinMessage(config,client,device.publicKey))));state=await store.saveState(await chainAPI('join',{client,publicKey:device.publicKey,proof}),config);}catch(e){if(!state)throw e;}
- if(!state)throw Error('STATE_UNAVAILABLE');
+ if(!state)throw Error('STATE_UNAVAILABLE');await convergeInitialOwnership();renderOwnership();
  const rows=await store.receipts(config);if(rows.length)complete(rows.at(-1));else{
   anchor=await store.clockAnchor(config);
   const intent=await store.intent(config.show);if(intent){try{
