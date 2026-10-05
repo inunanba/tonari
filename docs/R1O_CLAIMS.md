@@ -5,9 +5,12 @@ It is **not** on-chain `post_claims_root`, validated drop issuance, fairness pro
 completion mint, or a completed judge path. Those integration steps remain open.
 
 `packages/protocol/claims.mjs` signs each claim with the non-exportable device
-Ed25519 key. Its fixed 224-byte body is `TONARI/v2/claim\0`, then the exact fields:
+Ed25519 key. R1p extends its fixed body to 256 bytes. It is
+`TONARI/v2/claim\0`, then the exact fields:
 show, policy, ticket (32-byte lowercase hex each), checkpoint/window/frame (u32
-little-endian), tile/tokenDigest/previous (32-byte hex each), sequence (u32 LE).
+little-endian), tile/tokenDigest/boardDigest/previous (32-byte hex each), sequence
+(u32 LE). `boardDigest` binds the canonical missing-tile snapshot asserted by the
+device; it does not independently prove the on-chain board state.
 The token digest binds evidence; it does not establish a checkpoint signature,
 time eligibility, missing-tile eligibility, rare outcome, or physics cap.
 

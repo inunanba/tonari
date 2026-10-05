@@ -41,7 +41,7 @@ function complete(r){
  receipt=r;sent=null;pending=null;camera.stop();document.querySelector('tonari-guide').setAttribute('state','swap');$('#pick').hidden=true;$('#review').hidden=true;$('#reader').hidden=true;$('#settlement').hidden=false;
  if(r.offer.b===device.publicKey)draw(encodeWire('R',fromHex(r.packet,368)),'相手にこの結果QRを返してください。');else{$('#qr').hidden=true;$('#qr-label').textContent='双方の署名を、この端末に保存しました。';}
  const final=r.ownershipFinal===true;$('#phase').textContent=final?'④ 交換が確定しました ✓':'③ 仮受け取りを保存しました ✓';$('#status').textContent=final?(config.cluster==='devnet'?'Solana Devnetの確定記録を確認しました。':'ローカルチェーンの確定記録を確認しました。'):'双方の署名を確認しました。通信が戻ったら確定できます。';
- $('#settle').disabled=final;$('#chain-status').textContent='確定前のピースは、別の交換に使いません。';$('#transaction').replaceChildren();
+ $('#settle').disabled=final;$('#settle').hidden=final;$('#chain-status').textContent='確定前のピースは、別の交換に使いません。';$('#transaction').replaceChildren();
  if(final){const view=settlementPresentation(config,r.settlement.value.signature);$('#chain-status').textContent=view.status;
   if(view.url){const link=document.createElement('a');link.href=view.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=view.label;$('#transaction').append(link);}else $('#transaction').textContent=view.label;
  }

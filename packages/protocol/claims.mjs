@@ -2,7 +2,7 @@
 import {fromHex,hex,concat,digest} from './swap.mjs';
 import {uint32} from './swap-v2.mjs';
 const enc=new TextEncoder();
-const fields=['show','policy','ticket','checkpoint','window','frame','tile','tokenDigest','previous','sequence'];
+const fields=['show','policy','ticket','checkpoint','window','frame','tile','tokenDigest','boardDigest','previous','sequence'];
 function exact(value,keys){if(!value||Object.getPrototypeOf(value)!==Object.prototype||Object.keys(value).sort().join()!==keys.slice().sort().join())throw Error('BAD_CLAIM_FIELDS');}
 function number(n){uint32(n);const b=new Uint8Array(4);new DataView(b.buffer).setUint32(0,n,true);return b;}
 function scope(s){exact(s,['show','policy']);return concat(fromHex(s.show,32),fromHex(s.policy,32));}

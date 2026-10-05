@@ -10,6 +10,7 @@ const assert=require('node:assert/strict');
     const result=await page.evaluate(async()=>{
       const {DeviceStore}=await import('/packages/protocol/storage.mjs');
       const {createDevice,signOffer,acceptOffer}=await import('/packages/protocol/swap.mjs');
+      const {signDrop}=await import('/packages/protocol/drop.mjs');
       const must=(b,message)=>{if(!b)throw new Error(message);};
       const rejected=async(job,reason)=>{try{await job();throw new Error('unexpected success');}catch(e){must(e.message.includes(reason),`expected ${reason}, got ${e.message}`);}};
       const [a,a2]=await Promise.all([DeviceStore.open('client-0'),DeviceStore.open('client-0')]);
@@ -40,9 +41,13 @@ const assert=require('node:assert/strict');
       const foreign=await DeviceStore.open('client-2');await rejected(()=>foreign.receive(packet,{show,now:100}),'NOT_PARTICIPANT');
       must((await foreign.receipts(show)).length===0,'foreign packet persisted');
       await b.receive(packet,{show,now:100});must((await b.receipts(show)).length===1,'other party namespace blocked');
+      const checkpoint=await createDevice(),claimScope={show:'44'.repeat(32),policy:'55'.repeat(32)},claimConfig={...claimScope,checkpointKeys:[checkpoint.publicKey]};
+      const dropValue={...claimScope,checkpointKey:checkpoint.publicKey,checkpoint:1,window:2,frame:3,validFrom:300,validTo:320,probabilityPPM:1_000_000,cap:2,nonce:'66'.repeat(32)},drop=await signDrop(dropValue,checkpoint),missing=['71'.repeat(32),'72'.repeat(32)];
+      const issued=await reopened.claims.issueDrop(drop,claimConfig,missing,310);must(issued.eligible&&issued.claim.envelope.value.ticket===reopened.device.publicKey,'signed claim not issued');
+      const rogue=await createDevice(),rogueDrop=await signDrop({...dropValue,checkpointKey:rogue.publicKey},rogue);await rejected(()=>reopened.claims.issueDrop(rogueDrop,claimConfig,missing,310),'UNTRUSTED_CHECKPOINT_KEY');
       // Quota/storage deletion/power-loss and global settlement are explicitly not measured here.
-      reopened.close();b.close();foreign.close();
-      return {status:'PASS',checks:['concurrent_identity_singleton','nonextractable_key','abort_atomicity','two_handle_replay_atomicity','intent_clear_atomicity','reopen_identity_receipt','replay_after_reopen','pair_limit_after_reopen','cooldown_boundary','nonparticipant_reject','independent_local_namespaces'],chain_settlement:false};
+      reopened.close();const claimReopen=await DeviceStore.open('client-0');must((await claimReopen.claims.claims(claimConfig)).length===1,'claim lost or invalid on reopen');claimReopen.close();b.close();foreign.close();
+      return {status:'PASS',checks:['concurrent_identity_singleton','nonextractable_key','abort_atomicity','two_handle_replay_atomicity','intent_clear_atomicity','reopen_identity_receipt','replay_after_reopen','pair_limit_after_reopen','cooldown_boundary','nonparticipant_reject','independent_local_namespaces','trusted_drop_claim','untrusted_checkpoint_reject','claim_reopen_verify'],chain_settlement:false,global_claim_cap:false};
     });
     assert.equal(result.status,'PASS');console.log(JSON.stringify(result));
   } finally {await browser.close();}
