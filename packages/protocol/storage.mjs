@@ -8,7 +8,7 @@ export class DeviceStore {
   #db; #device;
   constructor(db,device) {this.#db=db;this.#device=device;}
   static async open(namespace) {
-    if(!/^(client|phone)-[012]$/.test(namespace)) throw new Error('BAD_NAMESPACE');
+    if(!(/^(client|phone)-[012]$/.test(namespace)||namespace==='call-response-rally')) throw new Error('BAD_NAMESPACE');
     if(!globalThis.indexedDB) throw new Error('STORAGE_UNAVAILABLE');
     const db=await new Promise((resolve,reject)=>{
       const r=indexedDB.open(`tonari-v1-${namespace}`,3);

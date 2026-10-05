@@ -15,5 +15,5 @@ test('service worker precache closes the static module import graph for offline 
   for(const match of imports){if(!match[1].startsWith('.'))continue;const dependency=normalize(relative(root,resolve(dirname(resolve(root,file)),match[1]))).replaceAll('\\','/');if(!cached.has(dependency))missing.push(`${file} -> ${dependency}`);}
  }
  assert.deepEqual(missing,[],'offline module dependencies must be explicitly precached');
- assert.match(sw,/tonari-shell-v0\.8\.0/);
+ assert.match(sw,/tonari-shell-v0\.8\.1/);
 });
