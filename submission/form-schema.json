@@ -1,0 +1,43 @@
+{
+  "status": "DRAFT_NOT_SUBMITTED",
+  "colosseum": {
+    "project_name": "TONARI",
+    "brief_description": "Wallet-free offline neighbour play that turns venue rewards into a verifiable, safety-bounded crowd-control lever on Solana.",
+    "website": "https://inunanba.github.io/tonari/apps/web/judge.html",
+    "what_building": "TONARI turns three idle minutes beside a stranger in a low-signal venue queue into wallet-free offline play. Phones co-sign QR swaps; Queue Line and Call & Response add brief, non-coercive play. A deterministic allocator lowers rewards at busy locations, suggests quiet spots only within caps, and offers decline-safe virtual-queue slots. It is sensor-adapter ready and demoed with a simulated feed. Browser signatures map to a public Solana Devnet program and a dual-signature settlement. Users are venue guests; the buyer is a venue, promoter or operator. The first proposed step is a signage-only pilot, not an existing partnership.",
+    "why_now": "Venue queues increasingly combine long idle time, weak connectivity and uneven demand. Collection rewards can engage guests, but naive rare-location incentives can create a new crowd. Modern browser Ed25519 support and Solana's matching signature curve now let one phone identity verify offline and settle later without a wallet prompt. TONARI tests a more responsible pattern: make the social moment useful while treating induced load as a bounded, auditable constraint. Current evidence is a prototype and stylised model, not field deployment.",
+    "technologies": "Offline-first JavaScript PWA, Service Worker, IndexedDB, WebCrypto Ed25519, local QR codec, deterministic TypeScript allocator/games, Node 24 tests, Playwright/Chrome gates, Anchor/Rust and Solana Devnet. Developer tools include Git/GitHub and Solana/Agave tooling. ChatGPT/Codex and Grok/GrokBot assisted code, tests, research, browser/Devnet integration and submission preparation under the solo builder's direction; VOICEVOX is planned for narration.",
+    "chains": ["Solana"],
+    "chain_use": "Phone WebCrypto and Solana both use Ed25519, so the same ephemeral device identity signs an offline exchange and is verified on-chain without a wallet prompt. The public Devnet program verifies the two signatures through the Ed25519 precompile/introspection path and settles ownership versions. Batch roots and reveal logic provide an auditable fairness path. This is a Devnet prototype; production economics and throughput are not field validated.",
+    "category": "Consumer Apps",
+    "mobile_focused_dapp": true,
+    "country": "Japan",
+    "telegram": "<OWNER_TELEGRAM_REQUIRED>",
+    "contributors": "No additional human contributor is represented as a team member. AI tools assisted implementation, research, testing and integration under the solo builder's direction; VOICEVOX will provide credited synthetic narration. Public dependencies and their licenses are documented in the repository.",
+    "judges_note": "Free keepsake prototype: no resale, paid chance, complete-gacha mechanic, streak or loss for declining. Neighbours and sensor feed in the judge route are simulated; crowd figures are stylised model outputs, not field measurements. No production users, revenue, venue pilot or partnership is claimed. Public source, Chrome gates and Solana Devnet evidence are linked. Completion cNFT and final media remain gates until the submission evidence says otherwise.",
+    "accelerator_opt_in": "No",
+    "logo": "submission/tonari-logo.png",
+    "github": "https://github.com/inunanba/tonari",
+    "repo_context": "MIT monorepo with an offline PWA, signed QR protocol, allocator/games, Anchor program, relayer, tests and evidence docs. The judge path is wallet-free. Exact limitations are tracked in submission/EVIDENCE_MATRIX.md. Development began during this hackathon; prior-art references are acknowledged.",
+    "demo_video": "<YOUTUBE_OR_LOOM_OR_VIMEO_DEMO_URL>",
+    "demo_max_seconds": 180,
+    "live_product_link": "https://inunanba.github.io/tonari/apps/web/judge.html",
+    "access_instructions": "Open in a fresh mobile or desktop browser. No wallet or login. Follow steps 1–6. The scripted neighbour and sensor feed are labelled simulations; Explorer links are real Devnet evidence.",
+    "pitch_video": "<YOUTUBE_OR_LOOM_OR_VIMEO_PITCH_URL>",
+    "pitch_max_seconds": 120
+  },
+  "earn": {
+    "submission_link": "<COLOSSEUM_PROJECT_URL_AFTER_SUBMISSION>",
+    "tweet_link": "",
+    "project_name": "TONARI",
+    "earn_project_description": "TONARI is a wallet-free offline neighbour experience for low-signal venue queues. Phones co-sign QR swaps, play two brief games and later settle the same Ed25519 identities on Solana. A deterministic, capped allocator avoids busy locations and offers decline-safe virtual-queue slots. It is sensor-adapter ready and demoed with a simulated feed. Public Devnet program and settlement evidence exist; crowd results are stylised simulation, not field data. The proposed model is a signage-only venue pilot. No users, venue partnership or production deployment are claimed.",
+    "github": "https://github.com/inunanba/tonari",
+    "website": "https://inunanba.github.io/tonari/apps/web/judge.html",
+    "x_link": "",
+    "pitch": "<YOUTUBE_OR_LOOM_OR_VIMEO_PITCH_URL>",
+    "submitted_to_colosseum": "<SET_YES_ONLY_AFTER_COLOSSEUM_RECEIPT>",
+    "colosseum_project": "<COLOSSEUM_PROJECT_URL_AFTER_SUBMISSION>",
+    "colosseum_profile": "<COLOSSEUM_PROFILE_URL>",
+    "earn_anything_else": "Public repository, live wallet-free judge route and Solana Devnet evidence are linked above. The entry is free, keepsake-only and uses original venue-neutral art. The owner will review the track-scope and Japan KYC acknowledgements before the human-only Earn submission."
+  }
+}

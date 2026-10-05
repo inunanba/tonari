@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">TONARI logo</title>
+  <desc id="desc">Two rounded neighbour shapes join around a white spark.</desc>
+  <rect width="1024" height="1024" rx="224" fill="#fff8f2"/>
+  <path d="M154 512c0-174 119-315 266-315 91 0 171 54 219 137-93 51-156 151-156 266 0 69 22 133 61 184-38 27-80 43-124 43-147 0-266-141-266-315Z" fill="#ff7799"/>
+  <path d="M870 512c0 174-119 315-266 315-44 0-86-16-124-43 39-51 61-115 61-184 0-115-63-215-156-266 48-83 128-137 219-137 147 0 266 141 266 315Z" fill="#6ecfc4"/>
+  <path d="m512 394 34 69 76 11-55 54 13 76-68-36-68 36 13-76-55-54 76-11Z" fill="#fff"/>
+  <text x="512" y="920" text-anchor="middle" font-family="system-ui,sans-serif" font-size="96" font-weight="800" letter-spacing="12" fill="#40373b">TONARI</text>
+</svg>

@@ -22,13 +22,15 @@ Status: **FULL NO-GO**. This table is the source of truth for what media and for
 - [x] Actual Chrome judge path and inherited regressions pass on merged public source.
 - [x] Public Devnet program and dual-signature swap evidence.
 - [ ] Completion cNFT, or owner-approved honestly labelled fallback with recorded point loss.
-- [ ] Public pitch video ≤3:00; verified voice credit and English subtitles.
+- [ ] Public pitch video ≤2:00 on YouTube, Loom or Vimeo; verified voice credit and English subtitles.
 - [ ] Public technical demo ≤2:00.
 - [ ] Actual Superteam and Colosseum form fields/limits captured; all valid optional fields completed without invention.
 - [ ] Fresh-browser link check, final tests, adversarial claim review and current evidence hashes.
 - [ ] Work final integrated score and GO.
 - [ ] Owner final OK.
 - [ ] Bot/owner submission receipts.
+
+Owner-supplied Telegram is a hard Colosseum form gate. Work defaults accelerator opt-in to No and mobile-focused dApp to Yes; both remain editable before paste.
 
 ## Residual ownership
 
