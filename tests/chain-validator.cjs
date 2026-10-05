@@ -1,7 +1,7 @@
 /* Local validator only. Ephemeral test keys, local faucet, never owner keys/devnet/mainnet. */
 const assert=require('node:assert/strict');
 const {randomBytes,createPrivateKey,sign}=require('node:crypto');
-const {Connection,Keypair,PublicKey,sendAndConfirmTransaction,TransactionInstruction}=require('@solana/web3.js');
+const {Connection,Keypair,PublicKey,SYSVAR_CLOCK_PUBKEY,sendAndConfirmTransaction,TransactionInstruction}=require('@solana/web3.js');
 (async()=>{
  const client=await import('../tools/chain-client.mjs');
  const {encodeOffer,acceptanceMessage}=await import('../packages/protocol/swap-v2.mjs');
@@ -12,7 +12,7 @@ const {Connection,Keypair,PublicKey,sendAndConfirmTransaction,TransactionInstruc
  assert((await c.getAccountInfo(client.PROGRAM_ID))?.executable,'LOCAL_PROGRAM_NOT_LOADED');
  const airdrop=await c.requestAirdrop(payer.publicKey,5e9);await c.confirmTransaction(airdrop,'confirmed');
  async function send(ix,signers=[payer]){const bh=(await c.getLatestBlockhash()).blockhash;const tx=client.transaction(payer.publicKey,bh,ix);assert(client.serializedSize(tx)<=1232,'TX_TOO_LARGE');return sendAndConfirmTransaction(c,tx,signers,{commitment:'confirmed',skipPreflight:false});}
- async function clock(){const slot=await c.getSlot();const now=await c.getBlockTime(slot);assert(Number.isInteger(now),'CLOCK_UNAVAILABLE');return now;}
+ async function clock(){const info=await c.getAccountInfo(SYSVAR_CLOCK_PUBKEY,'processed');assert(info?.data?.length>=40,'CLOCK_UNAVAILABLE');const now=Number(info.data.readBigInt64LE(32));assert(Number.isSafeInteger(now)&&now>=0,'CLOCK_UNAVAILABLE');return now;}
  async function waitForClock(target){for(let i=0;i<30;i++){if(await clock()>=target)return;await new Promise(r=>setTimeout(r,250));}throw Error('CLOCK_WAIT_TIMEOUT');}
  async function show(cap=24){const seed=randomBytes(32),key=client.showAddress(seed),deadline=(await clock())+1800;await send([client.createShow(payer.publicKey,seed,deadline,cap)]);const s=client.readAccount(await c.getAccountInfo(key),'Show');assert.equal(hex(s.policy),hex(client.policyHash(key,deadline,cap)));return {key,deadline,policy:hex(s.policy)};}
  async function player(s){const k=Keypair.generate(),id=randomBytes(32);await send([client.registerTicket(payer.publicKey,s.key,k.publicKey)]);await send([client.issueTile(payer.publicKey,s.key,k.publicKey,id)]);return {k,id};}
@@ -42,7 +42,7 @@ const {Connection,Keypair,PublicKey,sendAndConfirmTransaction,TransactionInstruc
  }
  async function accepted(name,instructions){const tx=await send(instructions);results.push({name,status:'PASS',tx});return tx;}
  const s=await show(),a=await player(s),b=await player(s),d=await player(s),e=await player(s);
- const claimWindow=7,checkpoint=Keypair.generate().publicKey,secret=randomBytes(32),claimNow=await clock(),validFrom=claimNow+1,validTo=claimNow+3,revealAfter=claimNow+4,commitment=client.dropRevealHash(s.key,Buffer.from(s.policy,'hex'),claimWindow,secret),windowKey=client.claimWindowAddress(s.key,claimWindow);
+ const claimWindow=7,checkpoint=Keypair.generate().publicKey,secret=randomBytes(32),claimNow=await clock(),validFrom=claimNow+5,validTo=claimNow+7,revealAfter=claimNow+8,commitment=client.dropRevealHash(s.key,Buffer.from(s.policy,'hex'),claimWindow,secret),windowKey=client.claimWindowAddress(s.key,claimWindow);
  await accepted('immutable claim window commitment',[client.commitClaimWindow(payer.publicKey,s.key,{window:claimWindow,checkpointKey:checkpoint,entropyCommitment:commitment,validFrom,validTo,revealAfter,probabilityPPM:500000,cap:3})]);
  let windowState=client.readAccount(await c.getAccountInfo(windowKey),'ClaimWindow');assert.equal(windowState.window,claimWindow);assert(windowState.checkpointKey.equals(checkpoint));assert.equal(windowState.rootPosted,false);assert.equal(windowState.revealed,false);
  const root=randomBytes(32);await rejected('claims root cannot post before window closes',[client.postClaimsRoot(payer.publicKey,s.key,claimWindow,root,2)],/Window|0x177a/);
