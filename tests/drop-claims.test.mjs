@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {IDBFactory,IDBObjectStore} from 'fake-indexeddb';
 import {createDevice} from '../packages/protocol/swap.mjs';
-import {dropBytes,signDrop,verifyDrop,evaluateDrop} from '../packages/protocol/drop.mjs';
+import {dropBytes,signDrop,verifyDrop,evaluateDrop,dropRevealCommitment,dropFrameNonce,verifyDropReveal} from '../packages/protocol/drop.mjs';
 import {DeviceStore} from '../packages/protocol/storage.mjs';
 const id=n=>n.toString(16).padStart(2,'0').repeat(32),scope={show:id(1),policy:id(2)};
 function value(checkpoint,changes={}){return {...scope,checkpointKey:checkpoint.publicKey,checkpoint:3,window:4,frame:5,validFrom:100,validTo:120,probabilityPPM:1_000_000,cap:2,nonce:id(9),...changes};}
@@ -20,6 +20,13 @@ test('deterministic outcome is ticket-bound, chooses only canonical missing tile
  const f=await fixture(),a=await evaluateDrop(f.token,{...scope,checkpointKey:f.checkpoint.publicKey},f.root.device.publicKey,f.missing,110),b=await evaluateDrop(f.token,{...scope,checkpointKey:f.checkpoint.publicKey},f.root.device.publicKey,[...f.missing].reverse(),110);assert.equal(a.eligible,true);assert.equal(a.tile,b.tile);assert.ok(f.missing.includes(a.tile));
  const zero=await signDrop(value(f.checkpoint,{probabilityPPM:0,frame:6}),f.checkpoint);assert.equal((await evaluateDrop(zero,{...scope,checkpointKey:f.checkpoint.publicKey},f.root.device.publicKey,f.missing,110)).eligible,false);
  await assert.rejects(evaluateDrop(f.token,{...scope,checkpointKey:f.checkpoint.publicKey},f.root.device.publicKey,[id(10),id(10)],110),/BAD_MISSING/);f.root.close();
+});
+test('revealed secret binds the on-chain commitment and every signed frame nonce',async()=>{
+ const checkpoint=await createDevice(),secret=id(6),nonce=await dropFrameNonce(scope.show,scope.policy,4,5,secret),token=await signDrop(value(checkpoint,{nonce}),checkpoint),commitment=await dropRevealCommitment(scope.show,scope.policy,4,secret);
+ assert.deepEqual(await verifyDropReveal(token,secret,commitment),{window:4,frame:5,nonce});
+ const vector=await dropRevealCommitment(id(7),id(8),4,id(9));assert.equal(vector,'42ae912073b05e90d395629a86a0964c6c393e7a92211c45b86b3d85337068bf');
+ await assert.rejects(verifyDropReveal(token,id(7),commitment),/COMMITMENT_MISMATCH/);
+ const otherFrame=await signDrop(value(checkpoint,{frame:6,nonce}),checkpoint);await assert.rejects(verifyDropReveal(otherFrame,secret,commitment),/NONCE_MISMATCH/);
 });
 test('eligible claim persists atomically, restores signatures/token eligibility and retains device key',async()=>{
  const f=await fixture(),out=await f.root.claims.issueDrop(f.token,f.config,f.missing,110);assert.equal(out.eligible,true);assert.equal(out.claim.envelope.value.sequence,0);const before=f.root.device.publicKey;f.root.close();
