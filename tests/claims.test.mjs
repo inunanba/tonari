@@ -6,10 +6,10 @@ import {createDevice} from '../packages/protocol/swap.mjs';
 import {claimBytes,signClaim,verifyClaim,buildClaimsBatch,verifyClaimProof,verifyClaimLog} from '../packages/protocol/claims.mjs';
 import {verifyClaimsDocument} from '../tools/verify-claims.mjs';
 const scope={show:'11'.repeat(32),policy:'22'.repeat(32)};
-function value(device,n=0,previous='00'.repeat(32)){return {...scope,ticket:device.publicKey,checkpoint:3,window:4,frame:5,tile:(n+1).toString(16).padStart(2,'0').repeat(32),tokenDigest:'33'.repeat(32),previous,sequence:n};}
+function value(device,n=0,previous='00'.repeat(32)){return {...scope,ticket:device.publicKey,checkpoint:3,window:4,frame:5,tile:(n+1).toString(16).padStart(2,'0').repeat(32),tokenDigest:'33'.repeat(32),boardDigest:'44'.repeat(32),previous,sequence:n};}
 async function fixture(){const device=await createDevice(),a=await signClaim(value(device),device),id=(await verifyClaim(a,scope)).id,b=await signClaim(value(device,1,id),device);return {device,a,b};}
 test('claim has fixed encoding/domain and authentic device signature; payload tampering rejected',async()=>{
- const {a,device}=await fixture();assert.equal(claimBytes(a.value).length,224);assert.equal(new TextDecoder().decode(claimBytes(a.value).slice(0,16)),'TONARI/v2/claim\0');
+ const {a,device}=await fixture();assert.equal(claimBytes(a.value).length,256);assert.equal(new TextDecoder().decode(claimBytes(a.value).slice(0,16)),'TONARI/v2/claim\0');
  assert.equal((await verifyClaim(a,scope)).value.ticket,device.publicKey);
  const bad=structuredClone(a);bad.value.tile='ff'.repeat(32);await assert.rejects(verifyClaim(bad,scope),/BAD_CLAIM_SIGNATURE/);
  await assert.rejects(signClaim({...a.value,ticket:'00'.repeat(32)},device),/WRONG_CLAIMANT/);
