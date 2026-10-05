@@ -2,7 +2,8 @@ import {qrcodegen} from '../../vendor/qrcodegen.mjs';
 import jsQR from '../../vendor/jsqr.mjs';
 import {decodeWire as decodeV1} from './wire.mjs';
 import {decodeWire as decodeV2} from './wire-v2.mjs';
-const decodeWire=text=>typeof text==='string'&&text.startsWith('TONARI2:')?decodeV2(text):decodeV1(text);
+import {readRallyWire} from './rally.mjs';
+const decodeWire=text=>typeof text==='string'&&text.startsWith('TONARIC1:')?readRallyWire(text):typeof text==='string'&&text.startsWith('TONARI2:')?decodeV2(text):decodeV1(text);
 /** Generated matrix/raster contains only public, typed TONARI wire bytes. */
 export function qrRaster(text,scale=4) {
   decodeWire(text);
