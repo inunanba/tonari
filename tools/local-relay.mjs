@@ -1,6 +1,6 @@
 /** Bounded three-device sponsor: local validator or explicit operator Devnet demo. */
 import {randomBytes,createPrivateKey,sign} from 'node:crypto';
-import {Connection,Keypair,PublicKey,sendAndConfirmTransaction} from '@solana/web3.js';
+import {Connection,Keypair,PublicKey,SYSVAR_CLOCK_PUBKEY,sendAndConfirmTransaction} from '@solana/web3.js';
 import * as chain from './chain-client.mjs';
 import {attestationBytes} from '../packages/protocol/attestation.mjs';
 import {inspectPacket,decodeOffer} from '../packages/protocol/swap-v2.mjs';
@@ -15,6 +15,12 @@ export const DEVNET_GENESIS='EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
 export const DEVNET_OPERATOR='8k7ygJWhiRu5BrPuvHPesR7CH1QTBmNEMJvFDpRjLFWf';
 export function requireDevnetGenesis(value){if(value!==DEVNET_GENESIS)throw Error('WRONG_GENESIS');}
 export function requireDevnetRPC(rpc){if(rpc!==DEVNET_RPC)throw Error('DEVNET_RPC_REQUIRED');return rpc;}
+export function readClockUnixTimestamp(info){
+ if(!info||!Buffer.isBuffer(info.data)||info.data.length<40)throw Error('CLOCK_UNAVAILABLE');
+ const value=Number(info.data.readBigInt64LE(32));if(!Number.isSafeInteger(value)||value<0||value>0xffffffff)throw Error('CLOCK_UNAVAILABLE');return value;
+}
+export async function programClock(connection,commitment='processed'){return readClockUnixTimestamp(await connection.getAccountInfo(SYSVAR_CLOCK_PUBKEY,commitment));}
+export function relayClocks(connection){return {exchange:()=>programClock(connection,'finalized'),claim:()=>programClock(connection,'processed')};}
 export async function createLocalRelay(rpc,options={}){return createRelay(requireLocalRPC(rpc),'localnet',options);}
 export async function createDevnetRelay({rpc=DEVNET_RPC,payer,seed,bindings=[],persistBindings}){
  requireDevnetRPC(rpc);
@@ -23,7 +29,7 @@ export async function createDevnetRelay({rpc=DEVNET_RPC,payer,seed,bindings=[],p
  if(!Array.isArray(bindings)||typeof persistBindings!=='function')throw Error('PERSISTENT_BINDINGS_REQUIRED');
  return createRelay(rpc,'devnet',{payer,seed:Buffer.from(seed),bindings,persistBindings});
 }
-async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generate(),seed=randomBytes(32),bindings=[],persistBindings=async()=>{}}={}){
+async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generate(),seed=randomBytes(32),bindings=[],persistBindings=async()=>{},claimState=null,persistClaimState=async()=>{}}={}){
  const c=new Connection(rpc,'finalized'),show=chain.showAddress(seed);
  if(cluster==='devnet')requireDevnetGenesis(await c.getGenesisHash());
  if(!(await c.getAccountInfo(chain.PROGRAM_ID,'finalized'))?.executable)throw Error('PROGRAM_NOT_LOADED');
@@ -32,22 +38,25 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
  if(cluster==='devnet'&&await c.getBalance(payer.publicKey,'finalized')<30000000)throw Error('DEVNET_TEST_BALANCE_LOW');
  const privateKey=createPrivateKey({key:Buffer.concat([Buffer.from('302e020100300506032b657004220420','hex'),Buffer.from(payer.secretKey.subarray(0,32))]),format:'der',type:'pkcs8'});
  const attest=value=>({value,signature:sign(null,attestationBytes(value),privateKey).toString('hex')});
- async function clock(){const slot=await c.getSlot('finalized'),now=await c.getBlockTime(slot);if(!Number.isInteger(now))throw Error('CLOCK_UNAVAILABLE');return now;}
+ // Exchange timestamps must match the finalized bank used by preflight. Claim
+ // windows need the current processed bank so a short lead is not already stale.
+ const {exchange:exchangeClock,claim:claimClock}=relayClocks(c);
  async function send(instructions){const latest=await c.getLatestBlockhash('finalized'),tx=chain.transaction(payer.publicKey,latest.blockhash,instructions);if(chain.serializedSize(tx)>1232)throw Error('TX_TOO_LARGE');return sendAndConfirmTransaction(c,tx,[payer],{commitment:'finalized',skipPreflight:false});}
  const existingShow=await c.getAccountInfo(show,'finalized');
  const savedShow=existingShow&&chain.readAccount(existingShow,'Show');
  if(savedShow&&(!savedShow.authority.equals(payer.publicKey)||savedShow.cap!==24))throw Error('SHOW_CHANGED');
- const deadline=savedShow?savedShow.deadline:(await clock())+1800;
+ const deadline=savedShow?savedShow.deadline:(await exchangeClock())+1800;
  if(savedShow&&hex(savedShow.policy)!==hex(chain.policyHash(show,deadline,24)))throw Error('SHOW_CHANGED');
  if(!savedShow)await send([chain.createShow(payer.publicKey,seed,deadline,24)]);
  const config={show:hex(show.toBytes()),policy:hex(chain.policyHash(show,deadline,24)),issuer:hex(payer.publicKey.toBytes()),cluster,programId:chain.PROGRAM_ID.toBase58()};
  const claimUnavailable=async()=>{throw Error('CLAIM_PROGRAM_NOT_DEPLOYED');};
- const claimOperator=cluster==='localnet'?new ClaimOperator({config,checkpointKey:hex(payer.publicKey.toBytes()),clock,
+ const loadClaimWindow=async window=>{const info=await c.getAccountInfo(chain.claimWindowAddress(show,window),'finalized');if(!info)return null;const x=chain.readAccount(info,'ClaimWindow');return {window:x.window,checkpointKey:hex(x.checkpointKey.toBytes()),entropyCommitment:hex(x.entropyCommitment),validFrom:x.validFrom,validTo:x.validTo,revealAfter:x.revealAfter,probabilityPPM:x.probabilityPPM,cap:x.cap,root:hex(x.claimsRoot),count:x.claimCount,rootPosted:x.rootPosted,revealed:x.revealed};};
+ const claimOperator=cluster==='localnet'?new ClaimOperator({config,checkpointKey:hex(payer.publicKey.toBytes()),clock:claimClock,finalityClock:exchangeClock,minimumStartDelay:5,persistState:persistClaimState,loadWindow:loadClaimWindow,
   signToken:async value=>({value:structuredClone(value),signature:sign(null,Buffer.from(dropBytes(value)),privateKey).toString('hex')}),
   commitWindow:value=>send([chain.commitClaimWindow(payer.publicKey,show,{...value,checkpointKey:new PublicKey(fromHex(value.checkpointKey,32)),entropyCommitment:fromHex(value.entropyCommitment,32)})]),
   postRoot:value=>send([chain.postClaimsRoot(payer.publicKey,show,value.window,fromHex(value.root,32),value.count)]),
   revealWindow:value=>send([chain.revealClaimWindow(payer.publicKey,show,value.window,value.secret)])
- }):null;
+ }):null;if(claimOperator)await claimOperator.restore(claimState);
  const clients=new Map();
  for(const [client,key] of bindings){if(![0,1,2].includes(client)||clients.has(client)||[...clients.values()].includes(key))throw Error('BAD_BINDINGS');fromHex(key,32);clients.set(client,key);}
  for(const ownerKey of clients.values()){const owner=new PublicKey(fromHex(ownerKey,32)),info=await c.getAccountInfo(chain.ticketAddress(show,owner),'finalized');
@@ -59,7 +68,7 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
   const result=await c.getMultipleAccountsInfoAndContext([show,...allIds.map(n=>chain.tileAddress(show,tileId(n)))],{commitment:'finalized'});
   const s=chain.readAccount(result.value[0],'Show');if(!s.authority.equals(payer.publicKey)||hex(s.policy)!==config.policy)throw Error('SHOW_CHANGED');
   const tiles=result.value.slice(1).flatMap((info,i)=>{if(!info)return [];const t=chain.readAccount(info,'Tile');if(!t.show.equals(show)||!t.id.equals(tileId(allIds[i])))throw Error('TILE_SUBSTITUTION');return [{id:hex(t.id),owner:hex(t.owner.toBytes()),version:t.version}];});
-  return attest({...common('state',result.context.slot,await clock()),deadline:s.deadline,paused:s.paused,tiles});
+  return attest({...common('state',result.context.slot,await exchangeClock()),deadline:s.deadline,paused:s.paused,tiles});
  }
  async function join({client,publicKey,proof}){
   if(![0,1,2].includes(client))throw Error('BAD_CLIENT');const pub=fromHex(publicKey,32),key=await crypto.subtle.importKey('raw',pub,'Ed25519',false,['verify']);
@@ -97,7 +106,7 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
      throw Error('FINALIZED_TRANSACTION_UNAVAILABLE');
     }
    }
-   const chainNow=await clock();
+   const chainNow=await exchangeClock();
    try{await inspectPacket(p,{...config,now:chainNow},{settlement:true});}catch(e){
     if(e.message==='SETTLEMENT_EXPIRED_OR_FUTURE')console.warn('SETTLEMENT_CLOCK_CHECK',JSON.stringify({chainNow,issuedAt:o.issuedAt,expiresAt:o.expiresAt,settleBy:o.settleBy,deadline,wallNow:Math.floor(Date.now()/1000)}));
     throw e;

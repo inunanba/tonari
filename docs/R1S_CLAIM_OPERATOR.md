@@ -12,6 +12,13 @@ device signature and complete per-ticket hash chain, and rejects duplicate claim
 or token IDs before building the root. The unrevealed secret is excluded from
 status responses.
 
+Window scheduling reads the processed bank's Clock sysvar, which is the time
+source enforced by the Anchor program. It does not derive execution time from a
+finalized slot's block time because that value may lag the bank clock. The local
+issuer also reserves a five-second transaction lead; lifecycle checks continue
+to use the unshifted Clock, so no token can be issued before the committed
+`validFrom`.
+
 `operations.html` exposes the sequence only through same-origin loopback API
 calls. The public static page fails closed as unavailable. The operator can save
 a signed DropToken, upload a device claim-record JSON, post the root, and reveal

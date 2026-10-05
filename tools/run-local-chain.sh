@@ -34,6 +34,7 @@ kill -0 "$tonari_validator_pid"
 node tests/chain-validator.cjs
 node tests/relay-validator.mjs
 if [[ "${TONARI_CHAIN_BROWSER:-0}" == "1" ]]; then
+  export TONARI_LOCAL_STATE_DIR="$tonari_test_ledger/operator"
   node tools/serve-chain.mjs > "$tonari_test_ledger/relay.log" 2>&1 &
   tonari_relay_pid=$!
   trap 'kill "$tonari_relay_pid" "$tonari_validator_pid" 2>/dev/null || true' EXIT
