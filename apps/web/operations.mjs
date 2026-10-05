@@ -2,6 +2,16 @@ import {allocate,initialAllocation,govern,initialGovernor} from '../../packages/
 import {prepareOffline} from './offline.mjs';
 const $=s=>document.querySelector(s),ids=['G01','G02','G11','G12','G21','G22','G31','G32'];
 let state=initialAllocation(),waits=Array(8).fill(0),time=0,last,governor=initialGovernor(),lastGovernor;const records=[];
+let claimFrame=0;
+async function claimAPI(endpoint,body){const response=await fetch('/api/tonari/'+endpoint,{...(body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})});if(!response.ok)throw Error(await response.text());return response.json();}
+function saveJSON(name,value){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function showClaim(value){document.documentElement.dataset.claimStatus=value.status;$('#claim-proof').hidden=false;$('#claim-proof').textContent=JSON.stringify(value,null,2);$('#claim-status').textContent=value.status==='UNAVAILABLE'?'配布PDAは公開Devnetへ未配置です。ローカル検証環境でのみ操作できます。':'状態: '+value.status+' · 配布 '+(value.issued??0)+'件 · claim '+(value.claims??0)+'件';const connected=value.status!=='UNAVAILABLE';$('#claim-open').disabled=!connected||!['IDLE','REVEALED'].includes(value.status);$('#claim-token').disabled=value.status!=='OPEN';$('#claim-submit').disabled=value.status!=='OPEN';$('#claim-root').disabled=value.status!=='OPEN';$('#claim-reveal').disabled=value.status!=='ROOT_POSTED';}
+async function claimAction(job){try{showClaim(await job());}catch(e){$('#claim-status').textContent='操作を確定できませんでした: '+e.message;}}
+claimAPI('claim-status').then(showClaim).catch(()=>{showClaim({status:'UNAVAILABLE'});});
+$('#claim-open').addEventListener('click',()=>claimAction(()=>claimAPI('claim-open',{window:Math.floor(Date.now()/1000),startsIn:2,duration:20,revealDelay:2,probabilityPPM:Number($('#claim-probability').value),cap:Number($('#claim-cap').value)})));
+$('#claim-token').addEventListener('click',async()=>{try{const token=await claimAPI('claim-token',{frame:claimFrame++});saveJSON('tonari-drop-token.json',token);showClaim(await claimAPI('claim-status'));}catch(e){$('#claim-status').textContent='配布票を作れませんでした: '+e.message;}});
+$('#claim-submit').addEventListener('click',async()=>{const file=$('#claim-file').files[0];if(!file){$('#claim-status').textContent='端末が保存したclaim記録JSONを選んでください。';return;}if(file.size>16384){$('#claim-status').textContent='claim記録が大きすぎます。';return;}await claimAction(async()=>{await claimAPI('claim-submit',JSON.parse(await file.text()));return claimAPI('claim-status');});});
+$('#claim-root').addEventListener('click',()=>claimAction(()=>claimAPI('claim-root',{})));$('#claim-reveal').addEventListener('click',()=>claimAction(()=>claimAPI('claim-reveal',{})));
 function step(boundary=false,render=true){
  const before=structuredClone(state),governorBefore=structuredClone(governor),governorInput={time,target:Number($('#nudge').value),waits:[...waits],induced10:$('#induced').checked?[0,0,0,0,8,0,0,0]:Array(8).fill(0),boundary,windowMinutes:6,early:$('#early').checked};
  lastGovernor=govern(governor,governorInput);governor=lastGovernor.state;
@@ -29,5 +39,5 @@ $('#step').addEventListener('click',()=>{step(false);$('#status').textContent='�
 $('#window').addEventListener('click',()=>{step(true);$('#status').textContent='次の配布期間を開始し、候補を見直しました。';});
 $('#nudge').addEventListener('input',()=>{$('#nudge-value').textContent=$('#nudge').value;step(false);});
 for(const id of ['induced','early'])$('#'+id).addEventListener('change',()=>step(false));
-$('#download').addEventListener('click',()=>{const record={version:1,kind:'TONARI_ALLOCATION_MODEL_TRACE',sensor:'SIMULATED',model:'stylised, not calibrated',scope:'deterministic allocation/governor/early-budget kernels; operator-cap and monotone-window-gate variants; not full simulator',records};const url=URL.createObjectURL(new Blob([JSON.stringify(record,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='tonari-allocation-model.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+$('#download').addEventListener('click',()=>saveJSON('tonari-allocation-model.json',{version:1,kind:'TONARI_ALLOCATION_MODEL_TRACE',sensor:'SIMULATED',model:'stylised, not calibrated',scope:'deterministic allocation/governor/early-budget kernels; operator-cap and monotone-window-gate variants; not full simulator',records}));
 prepareOffline().then(()=>{$('#offline-status').textContent='通信なしで計算を続けられます。';document.documentElement.dataset.offlineReady='true';}).catch(e=>{$('#offline-status').textContent='通信なしでの再起動は準備できませんでした：'+e.message;});

@@ -5,6 +5,8 @@ import * as chain from './chain-client.mjs';
 import {attestationBytes} from '../packages/protocol/attestation.mjs';
 import {inspectPacket,decodeOffer} from '../packages/protocol/swap-v2.mjs';
 import {hex,fromHex} from '../packages/protocol/swap.mjs';
+import {dropBytes} from '../packages/protocol/drop.mjs';
+import {ClaimOperator} from './claim-operator.mjs';
 export const tileId=n=>Buffer.alloc(32,n);
 export const joinMessage=(config,client,key)=>new TextEncoder().encode(`TONARI/v2/local-join\0${config.show}:${client}:${key}`);
 export function requireLocalRPC(rpc){const u=new URL(rpc);if(u.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(u.hostname)||u.username||u.password||u.search||u.hash)throw Error('LOCAL_RPC_REQUIRED');return rpc;}
@@ -39,6 +41,13 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
  if(savedShow&&hex(savedShow.policy)!==hex(chain.policyHash(show,deadline,24)))throw Error('SHOW_CHANGED');
  if(!savedShow)await send([chain.createShow(payer.publicKey,seed,deadline,24)]);
  const config={show:hex(show.toBytes()),policy:hex(chain.policyHash(show,deadline,24)),issuer:hex(payer.publicKey.toBytes()),cluster,programId:chain.PROGRAM_ID.toBase58()};
+ const claimUnavailable=async()=>{throw Error('CLAIM_PROGRAM_NOT_DEPLOYED');};
+ const claimOperator=cluster==='localnet'?new ClaimOperator({config,checkpointKey:hex(payer.publicKey.toBytes()),clock,
+  signToken:async value=>({value:structuredClone(value),signature:sign(null,Buffer.from(dropBytes(value)),privateKey).toString('hex')}),
+  commitWindow:value=>send([chain.commitClaimWindow(payer.publicKey,show,{...value,checkpointKey:new PublicKey(fromHex(value.checkpointKey,32)),entropyCommitment:fromHex(value.entropyCommitment,32)})]),
+  postRoot:value=>send([chain.postClaimsRoot(payer.publicKey,show,value.window,fromHex(value.root,32),value.count)]),
+  revealWindow:value=>send([chain.revealClaimWindow(payer.publicKey,show,value.window,value.secret)])
+ }):null;
  const clients=new Map();
  for(const [client,key] of bindings){if(![0,1,2].includes(client)||clients.has(client)||[...clients.values()].includes(key))throw Error('BAD_BINDINGS');fromHex(key,32);clients.set(client,key);}
  for(const ownerKey of clients.values()){const owner=new PublicKey(fromHex(ownerKey,32)),info=await c.getAccountInfo(chain.ticketAddress(show,owner),'finalized');
@@ -104,5 +113,5 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
    const receipt=attest({...common('settled',status.slot,markers[0].settledAt),id,signature,commitment:'finalized'});receipts.set(id,receipt);return receipt;
   });
  }
- return {config,state,join,settle};
+ return {config,state,join,settle,claimStatus:()=>claimOperator?claimOperator.status():{status:'UNAVAILABLE',reason:'CLAIM_PROGRAM_NOT_DEPLOYED'},claimOpen:claimOperator?value=>claimOperator.open(value):claimUnavailable,claimToken:claimOperator?value=>claimOperator.token(value):claimUnavailable,claimSubmit:claimOperator?value=>claimOperator.submit(value):claimUnavailable,claimRoot:claimOperator?()=>claimOperator.publish():claimUnavailable,claimReveal:claimOperator?()=>claimOperator.reveal():claimUnavailable};
 }
