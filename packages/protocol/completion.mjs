@@ -27,6 +27,11 @@ export function completionBytes(value){
 export async function signCompletion(value,device,journey){
  const state=validateJourney(structuredClone(journey));
  if(!journeyComplete(state)||state.tiles!==24)throw Error('JOURNEY_INCOMPLETE');
+ return signFinalizedCompletion(value,device);
+}
+
+/** Sign a server-recomputed finalized 24/24 ownership value. */
+export async function signFinalizedCompletion(value,device){
  const snapshot=structuredClone(value),bytes=completionBytes(snapshot);
  if(snapshot.ticket!==device.publicKey)throw Error('WRONG_COMPLETION_DEVICE');
  return {value:snapshot,deviceSignature:hex(new Uint8Array(await crypto.subtle.sign('Ed25519',device.privateKey,concat(DEVICE,bytes))))};

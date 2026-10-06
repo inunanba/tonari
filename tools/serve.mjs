@@ -15,10 +15,10 @@ export function createWebServer(relay=null){return createServer(async(req,res)=>
       if(req.method==='GET'&&endpoint==='config')value=relay.config;
       else if(req.method==='GET'&&endpoint==='state')value=await relay.state();
       else if(req.method==='GET'&&endpoint==='claim-status')value=await relay.claimStatus();
-      else if(req.method==='POST'&&['join','settle','claim-open','claim-token','claim-submit','claim-root','claim-reveal'].includes(endpoint)){
+      else if(req.method==='POST'&&['join','settle','completion-draft','completion-record','completion-anchor','claim-open','claim-token','claim-submit','claim-root','claim-reveal'].includes(endpoint)){
         if(req.headers['content-type']!=='application/json'){res.writeHead(415).end('JSON_REQUIRED');return;}
-        const limit=endpoint==='claim-submit'?16384:2048;let body='';for await(const part of req){body+=part.toString();if(Buffer.byteLength(body)>limit){res.writeHead(413).end('BODY_TOO_LARGE');return;}}
-        const method={'claim-open':'claimOpen','claim-token':'claimToken','claim-submit':'claimSubmit','claim-root':'claimRoot','claim-reveal':'claimReveal'}[endpoint]||endpoint;value=await relay[method](JSON.parse(body));
+        const limit=endpoint==='claim-submit'||endpoint.startsWith('completion-')?16384:2048;let body='';for await(const part of req){body+=part.toString();if(Buffer.byteLength(body)>limit){res.writeHead(413).end('BODY_TOO_LARGE');return;}}
+        const method={'completion-draft':'completionDraft','completion-record':'completionRecord','completion-anchor':'completionAnchor','claim-open':'claimOpen','claim-token':'claimToken','claim-submit':'claimSubmit','claim-root':'claimRoot','claim-reveal':'claimReveal'}[endpoint]||endpoint;value=await relay[method](JSON.parse(body));
       }else{res.writeHead(404).end();return;}
       res.writeHead(200,{'Content-Type':'application/json; charset=utf-8'}).end(JSON.stringify(value));return;
     }
