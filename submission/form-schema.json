@@ -1,5 +1,5 @@
 {
-  "status": "MEDIA_READY_NOT_SUBMITTED",
+  "status": "WORK_FINAL_GO_AWAITING_OWNER_OK",
   "colosseum": {
     "project_name": "TONARI",
     "brief_description": "Wallet-free offline neighbour play that turns venue rewards into a verifiable, safety-bounded crowd-control lever on Solana.",

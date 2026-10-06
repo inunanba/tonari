@@ -7,22 +7,26 @@ const HTTPS=/^https:\/\//;
 const MEDIA_HOST=/^https:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|loom\.com|vimeo\.com)\//i;
 
 export function assessSubmissionReadiness(schema){
-  const blockers=[];
+  const blockers=[],postSubmissionEvidencePending=[];
   const c=schema?.colosseum||{},e=schema?.earn||{};
   const need=(name,value,predicate=(v)=>typeof v==='string'&&v.trim()&&!PLACEHOLDER.test(v))=>{
     if(!predicate(value))blockers.push(name);
+  };
+  const needAfterSubmission=(name,value,predicate=(v)=>typeof v==='string'&&v.trim()&&!PLACEHOLDER.test(v))=>{
+    if(!predicate(value))postSubmissionEvidencePending.push(name);
   };
   need('owner_telegram',c.telegram);
   need('pitch_video',c.pitch_video,v=>typeof v==='string'&&MEDIA_HOST.test(v)&&!PLACEHOLDER.test(v));
   need('demo_video',c.demo_video,v=>typeof v==='string'&&MEDIA_HOST.test(v)&&!PLACEHOLDER.test(v));
   need('earn_pitch',e.pitch,v=>typeof v==='string'&&MEDIA_HOST.test(v)&&!PLACEHOLDER.test(v));
-  need('colosseum_submission_receipt',e.submission_link,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
-  need('colosseum_project',e.colosseum_project,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
-  need('colosseum_profile',e.colosseum_profile,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
-  if(e.submitted_to_colosseum!=='Yes')blockers.push('colosseum_receipt_confirmed');
+  needAfterSubmission('colosseum_submission_receipt',e.submission_link,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
+  needAfterSubmission('colosseum_project',e.colosseum_project,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
+  needAfterSubmission('colosseum_profile',e.colosseum_profile,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
+  if(e.submitted_to_colosseum!=='Yes')postSubmissionEvidencePending.push('colosseum_receipt_confirmed');
   return Object.freeze({
     verdict:blockers.length?'FULL_NO_GO':'READY_FOR_WORK_FINAL_REVIEW',
     blockers:Object.freeze(blockers),
+    postSubmissionEvidencePending:Object.freeze(postSubmissionEvidencePending),
     ownerFinalOk:false,
     submissionAuthorized:false,
     cNFT:'NOT_VERIFIED',
