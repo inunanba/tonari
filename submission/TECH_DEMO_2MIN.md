@@ -1,6 +1,6 @@
 # TONARI — 2-minute technical demo shot list
 
-Status: **DRAFT / NOT RECORDED / NOT SUBMITTED**. Hard cap: 2:00. This cut shows evidence, not a feature montage.
+Status: **DRAFT / UPLOADED UNLISTED / NOT SUBMITTED**. Uploaded duration: 1:54. This cut shows evidence, not a feature montage. Signed-out URL: https://youtu.be/yHdKe_2xoMI.
 
 Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:00, but this stronger cut stays at 2:00.
 
@@ -12,7 +12,7 @@ Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:
 | 0:55–1:15 | Switch G21 between quiet and crowded in the operations view. | `stylised model` and `simulated crowd input`; 3% seat / 1% crowded / 18% quiet; recommendation switches; caps/governor visible. | Only not-yet-owned pieces are eligible. The deterministic tiers and caps fail closed. Do not call this a real sensor deployment. |
 | 1:15–1:35 | Open the program and `settle_swap` transaction in Solana Explorer. | Exact program and transaction IDs; Devnet badge. | The public Devnet transaction verifies both phone signatures through the Ed25519 precompile path. |
 | 1:35–1:51 | Run `npm test`; scroll the public repository and protocol docs. | Green count, commit, MIT license. | The R2p source passes 184 Node tests. Public-host browser evidence must be recorded again after integration. |
-| 1:51–2:00 | Show the evidence matrix and remaining-gates row. | PDA fallback is live; cNFT/non-transferability are not claimed. Media/final review remain open. | Prototype limits are explicit; submission readiness is not claimed until every gate closes. |
+| 1:51–2:00 | Show the evidence matrix and remaining-gates row. | PDA fallback is live; cNFT/non-transferability are not claimed. Form receipts and final approvals remain open. | Prototype limits are explicit; submission readiness is not claimed until every gate closes. |
 
 ## Capture requirements
 
@@ -22,3 +22,7 @@ Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:
 - The test count in narration must equal the tested commit. If R2i changes it, update the line before rendering.
 - Return: two-minute-or-less MP4, SHA-256, public URL, captured public commit, browser version and a list of cuts.
 - Add `VOICEVOX:四国めたん` in-video and in the description if the verified voice is used; recheck its terms at render time.
+
+## Published render evidence
+
+YouTube unlisted URL https://youtu.be/yHdKe_2xoMI was reachable signed out on 2026-10-06 and reported the expected title, EpicForge Studio channel and 1:54 duration. Local source SHA-256 begins `babcda22`. Uploading the media grants no submission authority.

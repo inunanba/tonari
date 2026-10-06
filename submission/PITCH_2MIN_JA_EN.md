@@ -1,6 +1,6 @@
 # TONARI — owner-final two-minute pitch
 
-Status: **DRAFT / RECORDED LOCALLY / NOT UPLOADED / NOT SUBMITTED**. The owner-final Japanese narration is fixed verbatim below. The current local render is **1:58.30**; the Colosseum field limit is 2:00. Japanese VOICEVOX narration with burnt-in English subtitles. Credit: `VOICEVOX:四国めたん` after terms are rechecked at upload time.
+Status: **DRAFT / UPLOADED UNLISTED / NOT SUBMITTED**. The owner-final Japanese narration is fixed verbatim below. The local source is **1:58.30** and YouTube reports **1:58**; the Colosseum field limit is 2:00. Japanese VOICEVOX narration with burnt-in English subtitles and `VOICEVOX:四国めたん` credit. Signed-out URL: https://youtu.be/FS4sn8_zRHU.
 
 ## Truth boundary
 
@@ -35,6 +35,6 @@ The Japanese column above is the owner-final 2026-10-06 12:35 JST script verbati
 - Program: `2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA`
 - Devnet settlement: `qfTeQ1TryvERBEVJCsgiqSSfYusHSBGhN5cmVko4j3uZoLbFVRYd1V5zbh1hAipeFXwBHS3tvusCcAn8koVT7Zd`
 
-## Render gate
+## Published render evidence
 
-Use YouTube, Loom or Vimeo. Record the merged public build in a fresh profile. Keep the simulation, proposal and roadmap labels visible. Return duration, file hash, URL, public commit and transcript diff. The finished file must not exceed 2:00 and grants no submission authority.
+YouTube unlisted URL https://youtu.be/FS4sn8_zRHU was reachable signed out on 2026-10-06 and reported the expected title, EpicForge Studio channel and 1:58 duration. Local source SHA-256 begins `025ffee3`. Uploading the media grants no submission authority.

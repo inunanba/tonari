@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 const names=['PITCH_2MIN_JA_EN.md','TECH_DEMO_2MIN.md','FORM_ANSWERS.md','EVIDENCE_MATRIX.md','FINAL_REVIEW.md','SCRIPT_DELTAS.md'];
 const load=async name=>readFile(new URL(`../submission/${name}`,import.meta.url),'utf8');
 const schema=JSON.parse(await load('form-schema.json'));
+const mediaEvidence=JSON.parse(await load('public-media-evidence.json'));
 
 test('submission kit retains truthful status and authority boundaries',async()=>{
   for(const name of names){
@@ -40,19 +41,26 @@ test('Colosseum answers fit captured live limits and required choices',()=>{
   assert.equal(c.pitch_max_seconds,120);
   assert.equal(c.demo_max_seconds,180);
   assert.match(c.technologies,/ChatGPT\/Codex.*Grok\/GrokBot.*VOICEVOX/);
-  assert.match(c.telegram,/OWNER_TELEGRAM_REQUIRED/);
+  assert.equal(c.telegram,'@hiyoko0329');
 });
 
-test('media URLs and unfinished gates fail closed',async()=>{
+test('media URLs are exact while receipt and approval gates fail closed',async()=>{
   const c=schema.colosseum,e=schema.earn,matrix=await load('EVIDENCE_MATRIX.md');
-  assert.match(c.pitch_video,/YOUTUBE_OR_LOOM_OR_VIMEO/);
-  assert.match(c.demo_video,/YOUTUBE_OR_LOOM_OR_VIMEO/);
+  assert.equal(c.pitch_video,'https://youtu.be/FS4sn8_zRHU');
+  assert.equal(c.demo_video,'https://youtu.be/yHdKe_2xoMI');
+  assert.equal(e.pitch,c.pitch_video);
   assert.match(e.submitted_to_colosseum,/ONLY_AFTER.*RECEIPT/);
   assert.match(matrix,/Completion PDA fallback.*Proven on Devnet/i);
   assert.match(matrix,/Completion cNFT.*Not implemented/i);
   assert.match(matrix,/cNFT\/non-transferability kept `NOT_VERIFIED`/i);
+  assert.match(matrix,/Media gate is closed/);
   assert.match(matrix,/\[ \] Work final integrated score and GO/);
   assert.match(matrix,/\[ \] Owner final OK/);
+  assert.equal(mediaEvidence.pitch.url,c.pitch_video);
+  assert.equal(mediaEvidence.demo.url,c.demo_video);
+  assert.ok(mediaEvidence.pitch.duration_seconds<=c.pitch_max_seconds);
+  assert.ok(mediaEvidence.demo.duration_seconds<=c.demo_max_seconds);
+  assert.equal(mediaEvidence.submission_authorized,false);
 });
 
 test('logo source is original, venue-neutral and raster export exists',async()=>{

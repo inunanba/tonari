@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-10-06T20:58:00+09:00",
+  "verification_mode": "signed-out fresh cloud browser",
+  "channel": "EpicForge Studio",
+  "pitch": {
+    "url": "https://youtu.be/FS4sn8_zRHU",
+    "resolved_url": "https://www.youtube.com/watch?v=FS4sn8_zRHU",
+    "title": "TONARI – 待ち時間を、推しの絵をそろえる楽しさに（2分ピッチ）",
+    "visibility": "unlisted",
+    "duration_seconds": 118,
+    "local_sha256_prefix": "025ffee3",
+    "burned_in_english_subtitles": true
+  },
+  "demo": {
+    "url": "https://youtu.be/yHdKe_2xoMI",
+    "resolved_url": "https://www.youtube.com/watch?v=yHdKe_2xoMI",
+    "title": "TONARI – Technical Demo (offline swap, Solana Devnet)",
+    "visibility": "unlisted",
+    "duration_seconds": 114,
+    "local_sha256_prefix": "babcda22"
+  },
+  "submission_authorized": false
+}
