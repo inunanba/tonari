@@ -11,6 +11,7 @@ import {observedNow,offerTime} from '../../packages/protocol/observed-clock.mjs'
 import {ActionQueue} from './action-queue.mjs';
 import {SettlementRetry} from './settlement-retry.mjs';
 import {ownershipView} from '../../packages/protocol/ownership-view.mjs';
+import {renderPictureBoard} from './picture-board.mjs';
 const $=s=>document.querySelector(s),params=new URL(location.href).searchParams,client=params.has('client')?Number(params.get('client')):0;
 if(![0,1,2].includes(client))throw Error('BAD_CLIENT');
 const wallNow=()=>Math.floor(Date.now()/1000),now=()=>observedNow(anchor,wallNow()),number=id=>parseInt(id.slice(0,2),16)+1;
@@ -23,9 +24,10 @@ const retryable=e=>e instanceof TypeError||['AbortError','TimeoutError'].include
 const sync=new SettlementRetry({attempt:settle,isPending:()=>!!config&&!!receipt&&!receipt.ownershipFinal,isOnline:()=>navigator.onLine,isVisible:()=>!document.hidden});
 function draw(text,label){const r=qrRaster(text),c=$('#qr');c.hidden=false;c.width=r.width;c.height=r.height;c.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);$('#qr-label').textContent=label;}
 function renderOwnership(){
- const view=ownershipView(state,device.publicKey),board=$('#ownership-board');board.replaceChildren();
- for(const cell of view.cells){const node=document.createElement('span');node.className='tile'+(cell.owned?' owned':cell.issued?'':' unissued');node.dataset.tile=String(cell.index);if(cell.issued)node.dataset.version=String(cell.version);node.textContent=cell.owned?'◇':cell.issued?'·':'−';node.title=cell.issued?`ピース ${cell.number} · 所有権 ${cell.version}`:`ピース ${cell.number} · まだ発行されていません`;board.append(node);}
+ const view=ownershipView(state,device.publicKey),board=$('#ownership-board'),picture=renderPictureBoard(board,view.cells.filter(cell=>cell.owned).map(cell=>cell.index),view.cells.filter(cell=>cell.issued).map(cell=>cell.index));
+ for(const cell of view.cells){const node=board.querySelector(`[data-tile="${cell.index}"]`);node.classList.add('tile');if(cell.issued)node.dataset.version=String(cell.version);node.title=cell.issued?`ピース ${cell.number} · 所有権 ${cell.version}`:`ピース ${cell.number} · まだ発行されていません`;}
  $('#ownership-count').textContent=`${view.owned}枚所有・${view.issued}/${view.total}枚発行`;$('#ownership-status').textContent=`確定済み状態・スロット ${state.slot}。未発行の枠は所有として数えません。`;$('#ownership').hidden=false;
+ $('#ownership-reveal').hidden=!picture.complete;
 }
 function picks(){
  for(const name of ['give','want']){$('#'+name).replaceChildren();for(const tile of state.tiles.filter(t=>name==='give'?t.owner===device.publicKey:t.owner!==device.publicKey)){
