@@ -1,40 +1,38 @@
-# TONARI — Colosseum pitch production script
+# TONARI — owner-final two-minute pitch
 
-Status: **DRAFT / NOT RECORDED / NOT SUBMITTED**. Target runtime: **1:50–1:55**; the live Colosseum field says “Up to 2 minutes.” Japanese VOICEVOX narration with burnt-in English subtitles. This screen recording uses independent browser phone frames, not physical-phone footage.
+Status: **DRAFT / NOT RECORDED / NOT SUBMITTED**. Target runtime: **1:55**; the Colosseum field limit is 2:00. Japanese VOICEVOX narration with burnt-in English subtitles. Credit: `VOICEVOX:四国めたん` after terms are rechecked at render time.
 
 ## Truth boundary
 
-- Real: browser Ed25519 signatures, offline-capable flows, public MIT source, public Solana Devnet program and linked `settle_swap`.
-- Simulated: neighbours, sensor feed, crowd movement, allocation and queue offers in the judge route.
-- Model output, not a field result: wait/crowd figures. No users, venue partnership, pilot, revenue or production readiness is claimed.
-- Prototype: the 24-piece completion view. The portable dual-signed completion record exists in R2k, but completion cNFT/on-chain non-transferability remains open.
-- Proposal, not a partnership or shipped entitlement: an artist message revealed on completion.
-- Roadmap: keeping pieces and completion history visible across events. A title such as「ラストピース職人」is an optional idea, not a shipped reward.
+- Real prototype: browser device signatures, offline exchange, 24-piece picture, signed completion record format, public MIT source and Solana Devnet evidence.
+- Simulated in the demo: neighbours, crowd input, movement, tier switching and venue operations. These are not field results.
+- Proposal: an artist message on completion. No artist or venue partnership is claimed.
+- Roadmap only: venue cameras estimating movement and automatically changing which spot is most favourable.
+- Open blocker: cNFT/on-chain non-transferability remains open; the current completion record is not a cNFT.
+- No prize, coupon, paid chance, complete-gacha mechanic, production users, pilot or revenue is claimed.
 
-## Timeline
+## Fixed six-part timeline and line-by-line subtitles
 
-| Time | Screen / edit | Japanese narration | English subtitle |
+| Time | Part / screen | Japanese narration | English subtitle |
 |---|---|---|---|
-| 0:00–0:14 | Title; desired completed picture appears, then breaks into 24 pieces. | 推しの絵を揃えたい。でも列では、集めることもできず、ただ立って待つ。TONARIは、その時間をコレクションに変えます。 | You want to complete that special picture, but a queue leaves you standing still. TONARI turns those minutes into collecting. |
-| 0:14–0:31 | Two browser phones; signed offline exchange; pieces connect. | となりの人と一枚ずつ交換すると、ピースが一つの絵につながっていく。端末ごとの鍵で二人が署名し、電波が弱くてもその場で確かめられます。 | Swap one piece with a neighbour and watch one picture come together. Both device keys sign, so it verifies even with weak connectivity. |
-| 0:31–0:47 | Queue Line and Call & Response, then decline with no loss. | 列つなぎとコール・アンド・レスポンスは短く、断っても失うものはありません。課金も連続ログインもなく、集めたい人が自分のペースで遊べます。 | Two short games, with nothing lost for declining. No payment or streaks: collect at your own pace. |
-| 0:47–1:05 | Quiet-spot offer; fixed “stylised model / simulated sensor feed” overlay. | 欲しいレアが静かな場所に現れれば、「あのピースが欲しい」が人を自然に分けます。模擬センサーを使うデモでは、上限とガバナーが新しい人だかりを防ぎます。 | A wanted rare piece at a quiet spot naturally spreads demand. In this simulated-sensor demo, caps and a governor prevent a new pile-up. |
-| 1:05–1:19 | Decline-safe later offer; model card. | 今すぐ動けなくても、断って損をしない提案と仮想列で、場所と時間に分散します。基準モデルの二十六パーセント減は現地実測ではありません。 | Decline-safe offers and a virtual queue spread demand across place and time. The model's 26% reduction is not field data. |
-| 1:19–1:35 | 24/24 picture; R2k completion record boundary card. | 二十四枚が揃うと、記念の完成絵と完了記録を残す設計です。アーティストの一言が開く演出も提案できますが、実在の提携ではありません。 | Completing 24 pieces is designed to leave a commemorative image and completion record. An artist-message reveal is a proposal, not a claimed partnership. |
-| 1:35–1:48 | History mock; “roadmap” badge; Devnet Explorer and repo. | 別のイベントでも過去のピースと完成履歴が見える体験を目指します。これはロードマップ。交換プログラムと双方署名の取引、コードとテストは公開済みです。 | The roadmap keeps past pieces and completion history visible across events. The signed swap, source and tests are already public. |
-| 1:48–1:53 | Guest/operator split, then wordmark. | 来場者には、揃える喜びと思い出を。運営には、人を集めずに、滞留を分散する選択肢を。トナリ。 | For guests: collecting and a keepsake. For operators: dispersal without creating another crowd. TONARI. |
+| 0:00–0:17 | **① 解決したい問題** — long line and crowded entrance. | ライブやイベントでは、何万人もが長く並びます。人が入口や売り場の前に固まると、事故の心配とスタッフの負担が増えます。でも、お願いだけでは人の流れは変わりません。 | At live events, thousands wait in long lines. When people cluster near entrances and shops, safety concerns and staff workload grow. Announcements alone do not change the flow. |
+| 0:17–0:38 | **② どんな考えで作ったか** — one favourite picture divides into 24. | そこで、ファンの「推しの絵を揃えたい」という気持ちに注目しました。推しの絵を二十四枚に分け、全部そろうと完成絵が開く。この完成させたい気持ちを、待ち時間の楽しさと、人を分ける力の両方に使います。 | We focused on a fan's wish to collect something they love. A favourite picture is split into 24 pieces and revealed when complete. That desire makes waiting enjoyable and gently spreads demand. |
+| 0:38–0:57 | **③ ピースの手に入れ方** — three starting pieces, neighbour swap, venue spot. | インストールもログインも不要です。スマホを開くと、ランダムな三枚から開始。となりの人と一枚ずつ交換するか、会場のスポットでコードを読んで、まだ持っていないピースを集めます。交換が中心です。 | No install or login is needed. Start with three random pieces. Swap one with a neighbour, or read a code at a venue spot to collect a piece you do not own yet. Swapping stays central. |
+| 0:57–1:15 | **④ 集めるとどうなるか** — picture fills, then 24/24 completion. | 集めるほど、推しの絵が埋まります。二十四枚そろうと、記念の完成絵と、署名された完成記録が手元に残ります。アーティストからのメッセージが開く演出は提案で、実在の提携ではありません。 | The picture fills as you collect. At 24 pieces, you keep the completed image and a signed completion record. An artist-message reveal is a proposal, not an existing partnership. |
+| 1:15–1:43 | **⑤ なぜ人が分散するのか** — seat 3%, crowded 1%, quiet 18%; recommendation switches. | 未所持ピースの出やすさは三段階です。席や列でも少しずつ。混雑中は控えめ。空いている場所では最も高くします。アプリがおすすめを知らせるので、早くそろえたい人だけが少しずつ移動し、ほかの人は席で交換できます。デモの混雑入力は模擬です。将来は会場カメラで人の動きを読み、場所を自動で切り替える使い方を目指します。 | The chance of a missing piece has three tiers: small at your seat, lower in crowded areas, and highest in quiet areas. The app announces a favourable spot, so only faster collectors move while others keep swapping. Demo crowd input is simulated; camera-driven switching is a future use. |
+| 1:43–1:55 | **⑥ 両方にとってのいいこと** — guest/operator split, wordmark. | 来場者には、待ち時間を推しの絵をそろえる楽しさと思い出に。運営には、混雑をならして安全に回す新しい選択肢を。TONARI。 | For guests, waiting becomes collecting and a memory. For operators, it becomes a new option for smoothing crowds. TONARI. |
 
-## End card and public links
+## End card
 
-`TONARI / Solo builder / MIT / Solana Devnet`
+`TONARI / Solo builder / MIT / Solana Devnet / stylised crowd model`
 
-`VOICEVOX:四国めたん` — Bot verified the current software and character terms on 2026-10-06; recheck at render time and use the same credit in the video description.
+`VOICEVOX:四国めたん`
 
 - Demo: `https://inunanba.github.io/tonari/apps/web/judge.html`
 - Repository: `https://github.com/inunanba/tonari`
 - Program: `2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA`
-- Settled swap: `qfTeQ1TryvERBEVJCsgiqSSfYusHSBGhN5cmVko4j3uZoLbFVRYd1V5zbh1hAipeFXwBHS3tvusCcAn8koVT7Zd`
+- Devnet settlement: `qfTeQ1TryvERBEVJCsgiqSSfYusHSBGhN5cmVko4j3uZoLbFVRYd1V5zbh1hAipeFXwBHS3tvusCcAn8koVT7Zd`
 
 ## Render gate
 
-Use YouTube, Loom or Vimeo. Record the public Pages build in a fresh profile, preserve every simulation/proposal/roadmap label, and return duration, file hash, URL and transcript diff. No submission authority is granted.
+Use YouTube, Loom or Vimeo. Record the merged public build in a fresh profile. Keep the simulation, proposal and roadmap labels visible. Return duration, file hash, URL, public commit and transcript diff. The finished file must not exceed 2:00 and grants no submission authority.

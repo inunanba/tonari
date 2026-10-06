@@ -36,8 +36,8 @@ async function uniform(label,total){
 /**
  * Reproducible cryptographic starting allocation. Slot zero is show-shared on
  * purpose, guaranteeing a duplicate across neighbouring devices. Remaining
- * slots bind the show and non-extractable device public key. Rare allocation
- * is deliberately outside this normal-piece function and stays governor-led.
+ * slots bind the show and non-extractable device public key. Later chances
+ * award only not-yet-owned pieces and are handled outside this start function.
  */
 export async function seededStartingPieces({show,device,count=3,total=TOTAL}){
  if(!HEX.test(show)||!HEX.test(device)||!Number.isSafeInteger(count)||count<1||count>total||total!==TOTAL)throw Error('BAD_STARTING_SEED');

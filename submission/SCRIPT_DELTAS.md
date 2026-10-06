@@ -1,13 +1,21 @@
-# R2k pitch narrative deltas
+# R2p owner-final pitch deltas
 
-Status: **DRAFT / NOT SUBMITTED**. Compared with public main `6da3cdceb6aa2f30d1be04635126740a75d86a6c`.
+Status: **DRAFT / NOT SUBMITTED**. Compared with the R2k 1:53 script.
 
-- Replaced generic “make waiting fun” framing with the concrete desire to complete a favourite 24-piece picture.
-- Made the exchange payoff visible: each swap connects the picture; completion is designed to leave a commemorative image and completion record.
-- Explained dispersal plainly: governed rare pieces at quieter spots create pull, while caps, decline-safe offers and a virtual queue avoid a new pile-up.
-- Added a balanced close for guests and operators.
-- Added an artist-message reveal only as a proposal, with no venue or artist partnership claim.
-- Added cross-event pieces/history only as roadmap; the optional「ラストピース職人」title remains an unshipped idea.
-- Preserved simulation, model-not-field, no-payment, no-streak, no-reward, Devnet and submission-authority boundaries.
-- Retimed the same file to 1:53 target. The obsolete three-minute script remains deleted; the superseded 1:47 render must not be uploaded.
-- Tech demo narration is unchanged. At re-render, its on-screen suite count may be minimally updated from 159 to the integrated public total; this is a caption-only evidence update.
+- Replaced the complete narration in the owner's fixed six-part order: problem,
+  idea, acquisition, completion, dispersal, mutual benefit.
+- Kept the target at 1:55 under the two-minute Colosseum limit.
+- Removed the product concept and narration of a rare or special piece.
+- Added the exact current prototype tiers: 3% at a seat/line, 1% in a crowded
+  area, and 18% in a quiet area, always for a not-yet-owned piece.
+- Kept neighbour swapping as the main path and made non-movement progress
+  explicit, avoiding a forced or all-at-once move.
+- Kept the artist-message reveal labelled as a proposal with no partnership.
+- Labelled crowd input and movement as simulated and camera switching as roadmap
+  only. No calibrated crowd effect or physical safety result is claimed.
+- Removed narration jargon, including governor, sensor adapter and model
+  baseline. Technical caps and fail-closed evidence remain in docs/demo.
+- Preserved no purchase, prize, coupon, paid chance, streak or complete-gacha
+  boundaries and all submission authority gates.
+- The prior rendered pitch is superseded and must not be uploaded. Sena should
+  re-render only after the R2p public merge and recheck VOICEVOX terms.

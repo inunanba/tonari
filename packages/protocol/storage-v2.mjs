@@ -5,6 +5,18 @@ import {verifyAttestation,checkStateAdvance,checkOwned} from './attestation.mjs'
 export class ExchangeStore {
  constructor(db,device){this.db=db;this.device=device;}
  config(){return this.read('v2settings','config');}
+ completion(show){return this.read('v2settings','completion:'+show);}
+ saveCompletion(show,document){
+  if(typeof show!=='string'||!document||Object.getPrototypeOf(document)!==Object.prototype)throw Error('BAD_COMPLETION_DOCUMENT');
+  const stable=structuredClone(document),key='completion:'+show;
+  return this.write(['v2settings'],(tx,done,abort)=>{const s=tx.objectStore('v2settings'),r=s.get(key);r.onsuccess=()=>{try{
+   const prior=r.result;if(prior){
+    if(JSON.stringify(prior.record)!==JSON.stringify(stable.record)||JSON.stringify(prior.request)!==JSON.stringify(stable.request))throw Error('COMPLETION_CONFLICT');
+    if(prior.anchor&&JSON.stringify(prior.anchor)!==JSON.stringify(stable.anchor))throw Error('COMPLETION_CONFLICT');
+   }
+   s.put(stable,key);done(stable);
+  }catch(e){abort(e);}};});
+ }
  saveConfig(config){return this.write(['v2settings'],(tx,done,abort)=>{const s=tx.objectStore('v2settings'),r=s.get('config');r.onsuccess=()=>{try{if(r.result?.show===config.show&&['issuer','policy','cluster'].some(k=>r.result[k]!==config[k]))throw Error('CONFIG_CHANGED');s.put(structuredClone(config),'config');done();}catch(e){abort(e);}};});}
  read(name,key){return new Promise((resolve,reject)=>{const tx=this.db.transaction(name,'readonly'),r=tx.objectStore(name)[key===undefined?'getAll':'get'](key);let out;r.onsuccess=()=>out=r.result;tx.oncomplete=()=>resolve(out);tx.onabort=()=>reject(tx.error||Error('STORAGE_READ_FAILED'));});}
  write(names,job){return new Promise((resolve,reject)=>{const tx=this.db.transaction(names,'readwrite',{durability:'strict'});let value,error;try{job(tx,v=>value=v,e=>{error=e;tx.abort();});}catch(e){error=e;tx.abort();}tx.oncomplete=()=>resolve(value);tx.onabort=()=>reject(error||tx.error||Error('STORAGE_COMMIT_FAILED'));});}

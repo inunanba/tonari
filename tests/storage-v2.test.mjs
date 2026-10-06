@@ -20,6 +20,14 @@ test('v1 database migration preserves the nonextractable device identity',async(
  await new Promise((resolve,reject)=>{const q=indexedDB.open('tonari-v1-phone-0',1);q.onupgradeneeded=()=>{for(const name of ['identity','intents'])q.result.createObjectStore(name);q.result.createObjectStore('receipts',{keyPath:'id'});q.transaction.objectStore('identity').add(device,'device');};q.onsuccess=()=>{q.result.close();resolve();};q.onerror=()=>reject(q.error);});
  const r=await DeviceStore.open('phone-0');assert.equal(r.device.publicKey,device.publicKey);assert.equal(r.device.privateKey.extractable,false);assert.equal(await r.exchange.config(),undefined);r.close();
 });
+test('completion record and anchor request survive reopen and cannot be replaced',async()=>{
+ const f=await fixture(),record={value:'signed'},request={value:'anchor-request'},provisional={record,request,anchor:null};
+ await f.a.saveCompletion(f.config.show,provisional);f.roots[0].close();const reopened=await DeviceStore.open('phone-0');
+ assert.deepEqual(await reopened.exchange.completion(f.config.show),provisional);
+ const finalized={...provisional,anchor:{signature:'same'}};await reopened.exchange.saveCompletion(f.config.show,finalized);assert.deepEqual(await reopened.exchange.completion(f.config.show),finalized);
+ await assert.rejects(()=>reopened.exchange.saveCompletion(f.config.show,{...finalized,record:{value:'replacement'}}),/COMPLETION_CONFLICT/);
+ reopened.close();f.roots.slice(1).forEach(r=>r.close());
+});
 test('authority signatures bind cluster/show/policy; ownership cannot roll back',async()=>{
  const f=await fixture(),bad=structuredClone(f.envelope);bad.value.tiles[0].version=12;
  await assert.rejects(()=>f.a.saveState(bad,f.config),/BAD_AUTHORITY_SIGNATURE/);

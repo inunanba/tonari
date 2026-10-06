@@ -7,6 +7,9 @@ import {inspectPacket,decodeOffer} from '../packages/protocol/swap-v2.mjs';
 import {hex,fromHex} from '../packages/protocol/swap.mjs';
 import {dropBytes} from '../packages/protocol/drop.mjs';
 import {ClaimOperator} from './claim-operator.mjs';
+import {completionValueFromOwnership} from '../packages/protocol/completion-state.mjs';
+import {attestCompletion} from '../packages/protocol/completion.mjs';
+import {verifyCompletionAnchorRequest} from '../packages/protocol/completion-anchor.mjs';
 export const tileId=n=>Buffer.alloc(32,n);
 export const joinMessage=(config,client,key)=>new TextEncoder().encode(`TONARI/v2/local-join\0${config.show}:${client}:${key}`);
 export function requireLocalRPC(rpc){const u=new URL(rpc);if(u.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(u.hostname)||u.username||u.password||u.search||u.hash)throw Error('LOCAL_RPC_REQUIRED');return rpc;}
@@ -36,7 +39,7 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
  if(cluster==='localnet'){const funding=await c.requestAirdrop(payer.publicKey,5e9);await c.confirmTransaction(funding,'finalized');}
  // Public devnet uses only the explicitly configured test operator. No faucet.
  if(cluster==='devnet'&&await c.getBalance(payer.publicKey,'finalized')<30000000)throw Error('DEVNET_TEST_BALANCE_LOW');
- const privateKey=createPrivateKey({key:Buffer.concat([Buffer.from('302e020100300506032b657004220420','hex'),Buffer.from(payer.secretKey.subarray(0,32))]),format:'der',type:'pkcs8'});
+ const privateBytes=Buffer.concat([Buffer.from('302e020100300506032b657004220420','hex'),Buffer.from(payer.secretKey.subarray(0,32))]),privateKey=createPrivateKey({key:privateBytes,format:'der',type:'pkcs8'});
  const attest=value=>({value,signature:sign(null,attestationBytes(value),privateKey).toString('hex')});
  // Exchange timestamps must match the finalized bank used by preflight. Claim
  // windows need the current processed bank so a short lead is not already stale.
@@ -49,6 +52,7 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
  if(savedShow&&hex(savedShow.policy)!==hex(chain.policyHash(show,deadline,24)))throw Error('SHOW_CHANGED');
  if(!savedShow)await send([chain.createShow(payer.publicKey,seed,deadline,24)]);
  const config={show:hex(show.toBytes()),policy:hex(chain.policyHash(show,deadline,24)),issuer:hex(payer.publicKey.toBytes()),cluster,programId:chain.PROGRAM_ID.toBase58()};
+ const completionAuthority={publicKey:config.issuer,privateKey:await crypto.subtle.importKey('pkcs8',privateBytes,'Ed25519',false,['sign'])};
  const claimUnavailable=async()=>{throw Error('CLAIM_PROGRAM_NOT_DEPLOYED');};
  const loadClaimWindow=async window=>{const info=await c.getAccountInfo(chain.claimWindowAddress(show,window),'finalized');if(!info)return null;const x=chain.readAccount(info,'ClaimWindow');return {window:x.window,checkpointKey:hex(x.checkpointKey.toBytes()),entropyCommitment:hex(x.entropyCommitment),validFrom:x.validFrom,validTo:x.validTo,revealAfter:x.revealAfter,probabilityPPM:x.probabilityPPM,cap:x.cap,root:hex(x.claimsRoot),count:x.claimCount,rootPosted:x.rootPosted,revealed:x.revealed};};
  const claimOperator=cluster==='localnet'?new ClaimOperator({config,checkpointKey:hex(payer.publicKey.toBytes()),clock:claimClock,finalityClock:exchangeClock,minimumStartDelay:5,persistState:persistClaimState,loadWindow:loadClaimWindow,
@@ -61,7 +65,9 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
  for(const [client,key] of bindings){if(![0,1,2].includes(client)||clients.has(client)||[...clients.values()].includes(key))throw Error('BAD_BINDINGS');fromHex(key,32);clients.set(client,key);}
  for(const ownerKey of clients.values()){const owner=new PublicKey(fromHex(ownerKey,32)),info=await c.getAccountInfo(chain.ticketAddress(show,owner),'finalized');
   const ticket=chain.readAccount(info,'Ticket');if(!ticket.owner.equals(owner)||!ticket.show.equals(show))throw Error('BAD_BINDINGS');}
- const allIds=[0,1,2,8,9,10,16,17,18],receipts=new Map();let tail=Promise.resolve();
+ // Always read the complete board. Missing accounts remain unissued, while any
+ // later allocation/claim path can make a real 24/24 completion reachable.
+ const allIds=Array.from({length:24},(_,index)=>index),receipts=new Map();let tail=Promise.resolve();
  const serial=job=>{const result=tail.then(job);tail=result.catch(()=>{});return result;};
  const common=(kind,slot,observedAt)=>({kind,...Object.fromEntries(['show','policy','issuer','cluster'].map(k=>[k,config[k]])),slot,observedAt});
  async function state(){
@@ -122,5 +128,20 @@ async function createRelay(rpc,cluster,{onSubmitted=()=>{},payer=Keypair.generat
    const receipt=attest({...common('settled',status.slot,markers[0].settledAt),id,signature,commitment:'finalized'});receipts.set(id,receipt);return receipt;
   });
  }
- return {config,state,join,settle,claimStatus:()=>claimOperator?claimOperator.status():{status:'UNAVAILABLE',reason:'CLAIM_PROGRAM_NOT_DEPLOYED'},claimOpen:claimOperator?value=>claimOperator.open(value):claimUnavailable,claimToken:claimOperator?value=>claimOperator.token(value):claimUnavailable,claimSubmit:claimOperator?value=>claimOperator.submit(value):claimUnavailable,claimRoot:claimOperator?()=>claimOperator.publish():claimUnavailable,claimReveal:claimOperator?()=>claimOperator.reveal():claimUnavailable};
+ async function completionTiles(publicKey){
+  if(![...clients.values()].includes(publicKey))throw Error('UNKNOWN_COMPLETION_DEVICE');fromHex(publicKey,32);
+  const ids=Array.from({length:24},(_,i)=>i),result=await c.getMultipleAccountsInfoAndContext(ids.map(n=>chain.tileAddress(show,tileId(n))),{commitment:'finalized'}),tiles=result.value.map((info,index)=>{if(!info)throw Error('COMPLETION_REQUIRES_24');const tile=chain.readAccount(info,'Tile');if(!tile.show.equals(show)||!tile.id.equals(tileId(index))||hex(tile.owner.toBytes())!==publicKey)throw Error('COMPLETION_REQUIRES_24');return {id:hex(tile.id),owner:publicKey,version:tile.version};});
+  return {tiles,slot:result.context.slot};
+ }
+ async function completionDraft({publicKey}){const completedAt=await exchangeClock(),snapshot=await completionTiles(publicKey);return {value:await completionValueFromOwnership({...config,ticket:publicKey,tiles:snapshot.tiles,completedAt}),slot:snapshot.slot,authority:config.issuer};}
+ async function completionRecord({request}){return serial(async()=>{const now=await exchangeClock();if(!request?.value||request.value.completedAt>now||now-request.value.completedAt>300)throw Error('COMPLETION_DRAFT_EXPIRED');const snapshot=await completionTiles(request.value.ticket),value=await completionValueFromOwnership({...config,ticket:request.value.ticket,tiles:snapshot.tiles,completedAt:request.value.completedAt});if(JSON.stringify(value)!==JSON.stringify(request.value))throw Error('COMPLETION_STATE_CHANGED');return {record:await attestCompletion(request,completionAuthority,{show:config.show,policy:config.policy}),slot:snapshot.slot};});}
+ async function completionAnchor({record,request}){return serial(async()=>{
+  const expected={show:config.show,policy:config.policy,authority:config.issuer},checked=await verifyCompletionAnchorRequest(request,record,expected),device=new PublicKey(fromHex(checked.value.device,32)),address=chain.completionAddress(show,device);
+  const matches=info=>{const value=chain.readAccount(info,'Completion');if(!value.show.equals(show)||hex(value.policy)!==config.policy||!value.device.equals(device)||hex(value.recordDigest)!==checked.value.recordDigest)throw Error('COMPLETION_ANCHOR_MISMATCH');return value;};
+  let info=await c.getAccountInfo(address,'finalized'),signature;
+  if(info){matches(info);const history=await c.getSignaturesForAddress(address,{limit:20},'finalized'),entry=history.find(value=>!value.err&&value.confirmationStatus==='finalized');if(!entry)throw Error('FINALIZED_TRANSACTION_UNAVAILABLE');signature=entry.signature;}
+  else {signature=await send(chain.completionAnchorInstructions(payer.publicKey,show,fromHex(config.policy,32),device,fromHex(checked.value.recordDigest,32),fromHex(checked.deviceSignature,64)));info=await c.getAccountInfo(address,'finalized');if(!info)throw Error('COMPLETION_ANCHOR_MISSING');matches(info);}
+  return {integrity:'VERIFIED',portableRecord:'VERIFIED',onChainAnchor:'VERIFIED',cNFT:'NOT_VERIFIED',nonTransferability:'NOT_VERIFIED',signature,address:address.toBase58(),recordDigest:checked.value.recordDigest};
+ });}
+ return {config,state,join,settle,completionDraft,completionRecord,completionAnchor,claimStatus:()=>claimOperator?claimOperator.status():{status:'UNAVAILABLE',reason:'CLAIM_PROGRAM_NOT_DEPLOYED'},claimOpen:claimOperator?value=>claimOperator.open(value):claimUnavailable,claimToken:claimOperator?value=>claimOperator.token(value):claimUnavailable,claimSubmit:claimOperator?value=>claimOperator.submit(value):claimUnavailable,claimRoot:claimOperator?()=>claimOperator.publish():claimUnavailable,claimReveal:claimOperator?()=>claimOperator.reveal():claimUnavailable};
 }

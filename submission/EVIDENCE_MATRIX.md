@@ -9,7 +9,7 @@ Status: **FULL NO-GO**. This table is the source of truth for what media and for
 | Public Solana program | Proven on Devnet | program `2XaNub…63iA`, deploy record | Always say Devnet/prototype; authority is not immutable. |
 | Dual-signature `settle_swap` | Proven on Devnet | tx `qfTeQ1…T7Zd` | May say public settlement; committed frontend/relay limitations remain documented. |
 | Actual Chrome quality gate | Proven for R2h | 154/154 Node; judge x2; inherited browser regressions; PR #24 | The 4.2 s figure is harness wall time, not human completion time. |
-| Quiet-spot and queue-offer behavior | Proven only as deterministic demo/model | allocator tests and operations browser | Say simulated sensor feed / stylised model, never real crowd control. |
+| Three-tier missing-piece and queue-offer behavior | Proven only as deterministic demo/model | tiered-chance tests and operations browser | Say 3% seat / 1% crowded / 18% quiet, simulated crowd input / stylised model; never real crowd control. |
 | −26%, 2.0 min, zero base-case herding | Model output | checked-in simulator research/golden vectors | Say simulation result, not measured venue impact. |
 | Users, venue partnership, pilot, revenue | Unproven | none | State none; pilot is a proposal. |
 | Physical phones / real camera / battery | Unproven | none | Do not claim. Three-phone view is browser emulation. |

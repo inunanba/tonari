@@ -65,11 +65,24 @@ test('logo source is original, venue-neutral and raster export exists',async()=>
 test('pitch centres collection desire while labelling future benefits',async()=>{
   const pitch=await load('PITCH_2MIN_JA_EN.md');
   assert.match(pitch,/推しの絵を揃えたい/);
-  assert.match(pitch,/静かな場所/);
-  assert.match(pitch,/新しい人だかりを防ぎます/);
-  assert.match(pitch,/記念の完成絵と完了記録/);
+  assert.match(pitch,/空いている場所では最も高く/);
+  assert.match(pitch,/混雑中は控えめ/);
+  assert.match(pitch,/記念の完成絵と、署名された完成記録/);
   assert.match(pitch,/提案.*実在の提携ではありません/);
-  assert.match(pitch,/ロードマップ/);
+  assert.match(pitch,/Roadmap only/i);
   assert.match(pitch,/cNFT\/on-chain non-transferability remains open/);
   assert.doesNotMatch(pitch,/最悪待ち時間/);
+});
+
+test('R2p pitch keeps the owner-fixed order and current tier truth boundaries',async()=>{
+  const pitch=await load('PITCH_2MIN_JA_EN.md'),form=await load('form-schema.json');
+  const ordered=['① 解決したい問題','② どんな考えで作ったか','③ ピースの手に入れ方','④ 集めるとどうなるか','⑤ なぜ人が分散するのか','⑥ 両方にとってのいいこと'];
+  let cursor=-1;
+  for(const heading of ordered){const next=pitch.indexOf(heading);assert(next>cursor,`${heading} must appear in fixed order`);cursor=next;}
+  assert.match(pitch,/3%/);assert.match(pitch,/1%/);assert.match(pitch,/18%/);
+  assert.match(pitch,/未所持/);assert.match(pitch,/模擬/);
+  assert.match(pitch,/Roadmap only:[\s\S]*cameras/i);
+  assert.doesNotMatch(pitch,/(レア|rare piece)/i);
+  assert.match(form,/3%/);assert.match(form,/1%/);assert.match(form,/18%/);
+  assert.match(form,/camera.*roadmap/i);
 });
