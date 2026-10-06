@@ -5,17 +5,23 @@ import {assessSubmissionReadiness} from '../tools/check-submission-readiness.mjs
 
 const schema=JSON.parse(await readFile(new URL('../submission/form-schema.json',import.meta.url),'utf8'));
 
-test('submission readiness fails closed on every owner, media and receipt placeholder',()=>{
+test('submission readiness closes owner/media gates but fails closed on receipt placeholders',()=>{
   const result=assessSubmissionReadiness(schema);
   assert.equal(result.verdict,'FULL_NO_GO');
   assert.deepEqual(result.blockers,[
-    'owner_telegram','pitch_video','demo_video','earn_pitch',
     'colosseum_submission_receipt','colosseum_project','colosseum_profile','colosseum_receipt_confirmed'
   ]);
   assert.equal(result.ownerFinalOk,false);
   assert.equal(result.submissionAuthorized,false);
   assert.equal(result.cNFT,'NOT_VERIFIED');
   assert.equal(result.nonTransferability,'NOT_VERIFIED');
+});
+
+test('owner-supplied media and Telegram values are wired exactly',()=>{
+  assert.equal(schema.colosseum.telegram,'@hiyoko0329');
+  assert.equal(schema.colosseum.pitch_video,'https://youtu.be/FS4sn8_zRHU');
+  assert.equal(schema.colosseum.demo_video,'https://youtu.be/yHdKe_2xoMI');
+  assert.equal(schema.earn.pitch,schema.colosseum.pitch_video);
 });
 
 test('complete evidence only advances to Work final review, never submission authorization',()=>{
