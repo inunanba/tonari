@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const names=['PITCH_2MIN_JA_EN.md','TECH_DEMO_2MIN.md','FORM_ANSWERS.md','EVIDENCE_MATRIX.md','SCRIPT_DELTAS.md'];
+const names=['PITCH_2MIN_JA_EN.md','TECH_DEMO_2MIN.md','FORM_ANSWERS.md','EVIDENCE_MATRIX.md','FINAL_REVIEW.md','SCRIPT_DELTAS.md'];
 const load=async name=>readFile(new URL(`../submission/${name}`,import.meta.url),'utf8');
 const schema=JSON.parse(await load('form-schema.json'));
 
@@ -48,7 +48,9 @@ test('media URLs and unfinished gates fail closed',async()=>{
   assert.match(c.pitch_video,/YOUTUBE_OR_LOOM_OR_VIMEO/);
   assert.match(c.demo_video,/YOUTUBE_OR_LOOM_OR_VIMEO/);
   assert.match(e.submitted_to_colosseum,/ONLY_AFTER.*RECEIPT/);
-  assert.match(matrix,/Completion cNFT.*Open blocker/i);
+  assert.match(matrix,/Completion PDA fallback.*Proven on Devnet/i);
+  assert.match(matrix,/Completion cNFT.*Not implemented/i);
+  assert.match(matrix,/cNFT\/non-transferability kept `NOT_VERIFIED`/i);
   assert.match(matrix,/\[ \] Work final integrated score and GO/);
   assert.match(matrix,/\[ \] Owner final OK/);
 });
@@ -70,7 +72,7 @@ test('pitch centres collection desire while labelling future benefits',async()=>
   assert.match(pitch,/記念の完成絵と、署名された完成記録/);
   assert.match(pitch,/提案.*実在の提携ではありません/);
   assert.match(pitch,/Roadmap only/i);
-  assert.match(pitch,/cNFT\/on-chain non-transferability remains open/);
+  assert.match(pitch,/cNFT and non-transferability remain open/);
   assert.doesNotMatch(pitch,/最悪待ち時間/);
 });
 

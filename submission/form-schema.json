@@ -14,7 +14,7 @@
     "country": "Japan",
     "telegram": "<OWNER_TELEGRAM_REQUIRED>",
     "contributors": "No additional human contributor is represented as a team member. AI tools assisted implementation, research, testing and integration under the solo builder's direction; VOICEVOX will provide credited synthetic narration. Public dependencies and their licenses are documented in the repository.",
-    "judges_note": "Free keepsake prototype: no resale, paid chance, complete-gacha mechanic, streak or loss for declining. Neighbours and sensor feed in the judge route are simulated; crowd figures are stylised model outputs, not field measurements. No production users, revenue, venue pilot or partnership is claimed. Public source, Chrome gates and Solana Devnet evidence are linked. Completion cNFT and final media remain gates until the submission evidence says otherwise.",
+    "judges_note": "Free keepsake prototype: no resale, paid chance, complete-gacha mechanic, streak or loss for declining. Neighbours and sensor feed in the judge route are simulated; crowd figures are stylised model outputs, not field measurements. No production users, revenue, venue pilot or partnership is claimed. Public source, Chrome gates and Solana Devnet evidence are linked. Completion uses a signed Devnet PDA fallback, not a cNFT or proof of non-transferability; final media remains gated.",
     "accelerator_opt_in": "No",
     "logo": "submission/tonari-logo.png",
     "github": "https://github.com/inunanba/tonari",

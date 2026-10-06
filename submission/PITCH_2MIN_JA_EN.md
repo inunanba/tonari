@@ -8,7 +8,7 @@ Status: **DRAFT / NOT RECORDED / NOT SUBMITTED**. Target runtime: **1:55**; the 
 - Simulated in the demo: neighbours, crowd input, movement, tier switching and venue operations. These are not field results.
 - Proposal: an artist message on completion. No artist or venue partnership is claimed.
 - Roadmap only: venue cameras estimating movement and automatically changing which spot is most favourable.
-- Open blocker: cNFT/on-chain non-transferability remains open; the current completion record is not a cNFT.
+- Recorded limitation: the signed completion record is anchored to a Devnet PDA; cNFT and non-transferability remain open and are not claimed.
 - No prize, coupon, paid chance, complete-gacha mechanic, production users, pilot or revenue is claimed.
 
 ## Fixed six-part timeline and line-by-line subtitles
