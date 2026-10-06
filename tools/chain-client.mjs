@@ -4,6 +4,7 @@ import {PublicKey,Transaction,TransactionInstruction,SystemProgram,SYSVAR_INSTRU
 import {decodeOffer} from '../packages/protocol/swap-v2.mjs';
 import {swapSignatureInstructions} from '../packages/protocol/precompile-v2.mjs';
 import {signatureInstruction} from '../packages/protocol/precompile.mjs';
+import {completionAnchorBytes} from '../packages/protocol/completion-anchor.mjs';
 export const PROGRAM_ID=new PublicKey('2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA');
 export const sha=(...data)=>createHash('sha256').update(Buffer.concat(data.map(x=>Buffer.from(x)))).digest();
 export const discriminator=(namespace,name)=>sha(Buffer.from(`${namespace}:${name}`)).subarray(0,8);
@@ -20,9 +21,8 @@ export const completionAddress=(show,device)=>pda(Buffer.from('completion'),show
 export const policyHash=(show,deadline,cap)=>sha(Buffer.from('TONARI/v2/show-policy\0'),show.toBuffer(),u32(deadline),u32(cap));
 export const dropRevealHash=(show,policy,window,secret)=>sha(Buffer.from('TONARI/v2/drop-reveal\0'),show.toBuffer(),Buffer.from(policy),u32(window),Buffer.from(secret));
 export function completionAnchorMessage(show,policy,device,recordDigest){
- const p=Buffer.from(policy),d=Buffer.from(recordDigest);
- if(p.length!==32||d.length!==32||d.every(x=>x===0))throw Error('BAD_COMPLETION_ANCHOR');
- return Buffer.concat([Buffer.from('TONARI/v2/completion-anchor\0'),show.toBuffer(),p,device.toBuffer(),d]);
+ try{return Buffer.from(completionAnchorBytes({show:show.toBuffer().toString('hex'),policy:Buffer.from(policy).toString('hex'),device:device.toBuffer().toString('hex'),recordDigest:Buffer.from(recordDigest).toString('hex')}));}
+ catch{throw Error('BAD_COMPLETION_ANCHOR');}
 }
 export const meta=(pubkey,isWritable=false,isSigner=false)=>({pubkey,isWritable,isSigner});
 export function instruction(name,args,keys){return new TransactionInstruction({programId:PROGRAM_ID,keys,data:Buffer.concat([discriminator('global',name),...args.map(x=>Buffer.from(x))])});}
