@@ -1,4 +1,5 @@
 //! Authority-issued prototype. No reward, token transfer, or completion mint.
+//! Completion anchors are immutable non-token PDAs and must never be called cNFTs.
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
     instruction::get_stack_height,
@@ -11,6 +12,7 @@ mod signature_binding;
 declare_id!("2XaNubDkBJx8d9V3YRqDyetLh3XuoKh7qVSEJSgK63iA");
 const ACCEPT: &[u8] = b"TONARI/v2/swap-accept\0";
 const DROP_REVEAL: &[u8] = b"TONARI/v2/drop-reveal\0";
+const COMPLETION_ANCHOR: &[u8] = b"TONARI/v2/completion-anchor\0";
 #[program]
 pub mod tonari {
     use super::*;
@@ -141,6 +143,57 @@ pub mod tonari {
         w.revealed_secret = secret;
         w.revealed_at = now;
         w.revealed = true;
+        Ok(())
+    }
+    pub fn anchor_completion(
+        ctx: Context<AnchorCompletion>,
+        device: Pubkey,
+        record_digest: [u8; 32],
+    ) -> Result<()> {
+        require!(!ctx.accounts.show.paused, ErrorCode::Paused);
+        require!(device != Pubkey::default() && record_digest != [0; 32], ErrorCode::Commitment);
+        require!(get_stack_height() == 1, ErrorCode::Cpi);
+        let sys = &ctx.accounts.instructions.to_account_info();
+        let index = load_current_index_checked(sys)?;
+        require!(index >= 1, ErrorCode::Binding);
+        let current = load_instruction_at_checked(usize::from(index), sys)?;
+        let mut expected = crate::instruction::AnchorCompletion::DISCRIMINATOR.to_vec();
+        expected.extend_from_slice(device.as_ref());
+        expected.extend_from_slice(&record_digest);
+        require!(current.program_id == crate::ID && current.data == expected, ErrorCode::Cpi);
+        let signature_ix = load_instruction_at_checked(usize::from(index) - 1, sys)?;
+        require!(
+            signature_ix.program_id == ed25519_program::ID && signature_ix.accounts.is_empty(),
+            ErrorCode::Binding
+        );
+        let show = ctx.accounts.show.key();
+        let mut message = Vec::with_capacity(COMPLETION_ANCHOR.len() + 128);
+        message.extend_from_slice(COMPLETION_ANCHOR);
+        message.extend_from_slice(show.as_ref());
+        message.extend_from_slice(&ctx.accounts.show.policy);
+        message.extend_from_slice(device.as_ref());
+        message.extend_from_slice(&record_digest);
+        require!(signature_ix.data.len() == 112 + message.len(), ErrorCode::Binding);
+        let signature: [u8; 64] = signature_ix.data[48..112]
+            .try_into()
+            .map_err(|_| error!(ErrorCode::Binding))?;
+        require!(
+            signature_binding::matches(&signature_ix.data, &device.to_bytes(), &signature, &message),
+            ErrorCode::Binding
+        );
+        let completion = &mut ctx.accounts.completion;
+        completion.show = show;
+        completion.policy = ctx.accounts.show.policy;
+        completion.device = device;
+        completion.record_digest = record_digest;
+        completion.anchored_at = chain_time()?;
+        completion.bump = ctx.bumps.completion;
+        emit!(CompletionAnchored {
+            show,
+            device,
+            record_digest,
+            anchored_at: completion.anchored_at,
+        });
         Ok(())
     }
     pub fn settle_swap(ctx: Context<SettleSwap>, nonce: [u8; 16]) -> Result<()> {
@@ -346,6 +399,20 @@ pub struct UpdateClaimWindow<'info> {
     pub claim_window: Account<'info, ClaimWindow>,
 }
 #[derive(Accounts)]
+#[instruction(device:Pubkey)]
+pub struct AnchorCompletion<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    #[account(seeds=[b"show",show.seed.as_ref()],bump=show.bump,has_one=authority)]
+    pub show: Account<'info, Show>,
+    #[account(init,payer=authority,space=8+Completion::INIT_SPACE,seeds=[b"completion",show.key().as_ref(),device.as_ref()],bump)]
+    pub completion: Account<'info, Completion>,
+    /// CHECK: exact address and checked loaders, never unchecked sysvar data.
+    #[account(address=anchor_lang::solana_program::sysvar::instructions::ID)]
+    pub instructions: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+#[derive(Accounts)]
 #[instruction(nonce:[u8;16])]
 pub struct SettleSwap<'info> {
     #[account(mut)]
@@ -428,6 +495,16 @@ pub struct ClaimWindow {
     pub revealed: bool,
     pub bump: u8,
 }
+#[account]
+#[derive(InitSpace)]
+pub struct Completion {
+    pub show: Pubkey,
+    pub policy: [u8; 32],
+    pub device: Pubkey,
+    pub record_digest: [u8; 32],
+    pub anchored_at: u32,
+    pub bump: u8,
+}
 #[event]
 pub struct SwapSettled {
     pub packet_hash: [u8; 32],
@@ -435,6 +512,13 @@ pub struct SwapSettled {
     pub tile_a: Pubkey,
     pub tile_b: Pubkey,
     pub settled_at: u32,
+}
+#[event]
+pub struct CompletionAnchored {
+    pub show: Pubkey,
+    pub device: Pubkey,
+    pub record_digest: [u8; 32],
+    pub anchored_at: u32,
 }
 #[error_code]
 pub enum ErrorCode {
@@ -483,6 +567,7 @@ mod account_tests {
         assert_eq!(8 + Tile::INIT_SPACE, 109);
         assert_eq!(8 + Marker::INIT_SPACE, 44);
         assert_eq!(8 + ClaimWindow::INIT_SPACE, 239);
+        assert_eq!(8 + Completion::INIT_SPACE, 141);
         assert_eq!(
             policy_hash(Pubkey::new_from_array([9; 32]), 2000, 24),
             [
