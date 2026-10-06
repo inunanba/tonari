@@ -1,4 +1,4 @@
-const STEPS=Object.freeze(['swap','queue','call','rare','offer','proof']);
+const STEPS=Object.freeze(['swap','queue','call','tier','offer','proof']);
 const fail=()=>{throw Error('BAD_JUDGE_JOURNEY');};
 
 export function freshJourney(){return Object.freeze({version:1,completed:Object.freeze([]),tiles:18});}

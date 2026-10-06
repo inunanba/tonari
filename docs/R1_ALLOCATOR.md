@@ -1,5 +1,7 @@
 # R1d — deterministic allocation parity, product correction and operator model
 
+> Historical implementation record. The current participant-facing policy no longer has a “rare piece” class. R2p uses three explicit chances for any not-yet-owned piece; see `tiered-chance.md`. The allocator/governor remains underneath as the cap, stop and slow-recovery safety layer.
+
 This is a chunk, not full simulation or settlement completion. Source original: canonical `knowledge/CONTEST_INTEL/tonari/sim/tonari_sim.py`, copied without changes to `reference/tonari_sim.py`. The fixture records its SHA256. Python3 + NumPy2.3.5 executes the actual AST statements0..14 of the original damped allocation block (lines333..358), not a rewritten pseudo-reference. TypeScript's allocateReference matches128 independently generated frames within1e-12, including rising/falling load, nudge0..8, fractional budget, cap exhaustion and display windows.
 
 ## Counterexample and deliberate product improvement

@@ -51,15 +51,12 @@ const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright'),assert=req
   // Reload: chain-backed 24/24 survives, action reappears, and repeating is idempotent (same finalized signature).
   await page.reload();await ready();await page.waitForFunction(()=>document.querySelector('#ownership-count').textContent==='24枚所有・24/24枚発行',null,{timeout:180000});
   assert.equal(await page.locator('#completion-actions').isVisible(),true);
-  // Repeat after reload: a fresh draft has a new completedAt, so it can never overwrite the immutable PDA.
-  // Record whether the UI can recover the original record (GAP if not); the PDA must stay unchanged either way.
+  // Repeat after reload: the persisted signed record/request must recover the immutable PDA and download.
   await page.locator('#create-completion').click();
-  await page.waitForFunction(()=>!document.querySelector('#completion-download').hidden||document.querySelector('#status').textContent.startsWith('確認できませんでした'),null,{timeout:180000});
-  let reloadRepeat;
-  if(await page.locator('#completion-download').isVisible()){const [again]=await Promise.all([page.waitForEvent('download'),page.locator('#completion-download').click()]),savedAgain=JSON.parse(fs.readFileSync(await again.path(),'utf8'));reloadRepeat={recovered:savedAgain.anchor.recordDigest===saved.anchor.recordDigest,signature_same:savedAgain.anchor.signature===saved.anchor.signature};assert.equal(savedAgain.anchor.address,saved.anchor.address);}
-  else reloadRepeat={recovered:false,error:await page.locator('#status').innerText()};
+  await page.locator('#completion-download').waitFor({state:'visible',timeout:180000});
+  const [again]=await Promise.all([page.waitForEvent('download'),page.locator('#completion-download').click()]),savedAgain=JSON.parse(fs.readFileSync(await again.path(),'utf8'));
+  const reloadRepeat={recovered:savedAgain.anchor.recordDigest===saved.anchor.recordDigest,signature_same:savedAgain.anchor.signature===saved.anchor.signature};assert.equal(reloadRepeat.recovered,true);assert.equal(reloadRepeat.signature_same,true);assert.equal(savedAgain.anchor.address,saved.anchor.address);
   const after=chain.readAccount(await connection.getAccountInfo(new web3.PublicKey(saved.anchor.address),'finalized'),'Completion');assert.equal(Buffer.from(after.recordDigest).toString('hex'),portable.id);
-  if(!reloadRepeat.recovered)assert.match(reloadRepeat.error||'',/COMPLETION_ANCHOR_MISMATCH/);
   const body=await page.locator('body').innerText();assert(!/cNFT[^\n]{0,12}(VERIFIED|検証済)/.test(body.replace(/NOT_VERIFIED|未検証/g,'')),'CNFT_LABEL_UPGRADED');
   if(shot)await page.screenshot({path:shot+'/completion-'+cluster+'-reload.png',fullPage:true});
   if(shot)fs.writeFileSync(shot+'/completion-'+cluster+'.json',JSON.stringify(saved,null,2));

@@ -12,7 +12,7 @@ const {chromium}=require(process.env.TONARI_PLAYWRIGHT||'playwright');const asse
    await page.locator('summary').click();assert.equal(await page.locator('details').evaluate(el=>el.open),true);
    await page.screenshot({path:'docs/kawaii-onboarding-after.png',fullPage:true,animations:'disabled',timeout:120000});
    // Preview component states only. Actual swap reaction is checked by qr-browser below.
-   for(const state of ['swap','rare','complete']){await page.locator('tonari-guide').evaluate((el,s)=>el.setAttribute('state',s),state);assert.equal(await page.locator('tonari-guide').getAttribute('data-guide-state'),state);await page.screenshot({path:'docs/kawaii-'+state+'-component.png',fullPage:true,animations:'disabled',timeout:120000});}
+   for(const state of ['swap','tier','complete']){await page.locator('tonari-guide').evaluate((el,s)=>el.setAttribute('state',s),state);assert.equal(await page.locator('tonari-guide').getAttribute('data-guide-state'),state);await page.screenshot({path:'docs/kawaii-'+state+'-component.png',fullPage:true,animations:'disabled',timeout:120000});}
    const duration=await page.locator('button').first().evaluate(el=>getComputedStyle(el).transitionDuration);assert.equal(duration,'0s');
   }
  }

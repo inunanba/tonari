@@ -47,6 +47,9 @@ test('every signed region, scope and authority reject tampering',async()=>{
 test('read-only CLI verifies integrity but never upgrades chain or cNFT claims',async()=>{
  const {authority,record}=await fixture(),expected={...scope,authority:authority.publicKey};
  const direct=await verifyCompletionDocument({record},expected);assert.equal(direct.portableRecord,'VERIFIED');assert.equal(direct.cNFT,'NOT_VERIFIED');
+ const anchor={integrity:'VERIFIED',portableRecord:'VERIFIED',onChainAnchor:'VERIFIED',cNFT:'NOT_VERIFIED',nonTransferability:'NOT_VERIFIED',recordDigest:direct.id,signature:'local-signature',address:'local-address'};
+ const downloaded=await verifyCompletionDocument({record,anchor},expected);assert.equal(downloaded.portableRecord,'VERIFIED');assert.equal(downloaded.onChainAnchor,'NOT_VERIFIED');
+ await assert.rejects(verifyCompletionDocument({record,anchor:{...anchor,recordDigest:id(31)}},expected),/BAD_COMPLETION_ANCHOR_DOCUMENT/);
  await assert.rejects(verifyCompletionDocument({record,extra:true},expected),/BAD_COMPLETION_DOCUMENT/);
  const dir=await mkdtemp(join(tmpdir(),'tonari-completion-')),file=join(dir,'record.json');await writeFile(file,JSON.stringify({record}));
  const run=spawnSync(process.execPath,['tools/verify-completion.mjs',file,scope.show,scope.policy,authority.publicKey],{encoding:'utf8'});

@@ -12,8 +12,8 @@ import {ActionQueue} from './action-queue.mjs';
 import {SettlementRetry} from './settlement-retry.mjs';
 import {ownershipView} from '../../packages/protocol/ownership-view.mjs';
 import {renderPictureBoard} from './picture-board.mjs';
-import {signFinalizedCompletion} from '../../packages/protocol/completion.mjs';
-import {prepareCompletionAnchor} from '../../packages/protocol/completion-anchor.mjs';
+import {signFinalizedCompletion,verifyCompletion} from '../../packages/protocol/completion.mjs';
+import {prepareCompletionAnchor,verifyCompletionAnchorRequest} from '../../packages/protocol/completion-anchor.mjs';
 const $=s=>document.querySelector(s),params=new URL(location.href).searchParams,client=params.has('client')?Number(params.get('client')):0;
 if(![0,1,2].includes(client))throw Error('BAD_CLIENT');
 const wallNow=()=>Math.floor(Date.now()/1000),now=()=>observedNow(anchor,wallNow()),number=id=>parseInt(id.slice(0,2),16)+1;
@@ -25,6 +25,15 @@ const fail=e=>{const text={ACTION_CONTEXT_CHANGED:'交換の内容が変わり�
 const retryable=e=>e instanceof TypeError||['AbortError','TimeoutError'].includes(e.name)||e.message==='CHAIN_SERVICE_UNAVAILABLE';
 const sync=new SettlementRetry({attempt:settle,isPending:()=>!!config&&!!receipt&&!receipt.ownershipFinal,isOnline:()=>navigator.onLine,isVisible:()=>!document.hidden});
 function draw(text,label){const r=qrRaster(text),c=$('#qr');c.hidden=false;c.width=r.width;c.height=r.height;c.getContext('2d').putImageData(new ImageData(r.data,r.width,r.height),0,0);$('#qr-label').textContent=label;}
+async function verifyFinalizedCompletion(record,finalized,expected){
+ const portable=await verifyCompletion(record,expected);
+ if(!finalized||finalized.integrity!=='VERIFIED'||finalized.portableRecord!=='VERIFIED'||finalized.onChainAnchor!=='VERIFIED'||finalized.cNFT!=='NOT_VERIFIED'||finalized.nonTransferability!=='NOT_VERIFIED'||finalized.recordDigest!==portable.id||typeof finalized.signature!=='string'||!finalized.signature||typeof finalized.address!=='string'||!finalized.address)throw Error('BAD_COMPLETION_RESULT');
+ return portable;
+}
+function showCompletion(record,finalized){
+ const view=settlementPresentation(config,finalized.signature),link=$('#completion-transaction');link.replaceChildren();if(view.url){const a=document.createElement('a');a.href=view.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='完成アンカー取引を開く';link.append(a);}else link.textContent=view.label;
+ const blob=URL.createObjectURL(new Blob([JSON.stringify({record,anchor:finalized},null,2)],{type:'application/json'})),download=$('#completion-download');download.href=blob;download.download='tonari-completion.json';download.hidden=false;$('#completion-status').textContent='署名済み完成記録と確定アンカーを検証しました。cNFT・非譲渡性は未検証です。';
+}
 function renderOwnership(){
  const view=ownershipView(state,device.publicKey),board=$('#ownership-board'),picture=renderPictureBoard(board,view.cells.filter(cell=>cell.owned).map(cell=>cell.index),view.cells.filter(cell=>cell.issued).map(cell=>cell.index));
  for(const cell of view.cells){const node=board.querySelector(`[data-tile="${cell.index}"]`);node.classList.add('tile');if(cell.issued)node.dataset.version=String(cell.version);node.title=cell.issued?`ピース ${cell.number} · 所有権 ${cell.version}`:`ピース ${cell.number} · まだ発行されていません`;}
@@ -119,9 +128,12 @@ $('#refresh').addEventListener('click',()=>actions.run(async()=>{if(receipt)retu
 $('#settle').addEventListener('click',()=>sync.request(true));window.addEventListener('online',()=>sync.request(false));
 $('#create-completion').addEventListener('click',()=>actions.run(async()=>{
  if(!state||!device||ownershipView(state,device.publicKey).owned!==24)throw Error('COMPLETION_REQUIRES_24');$('#create-completion').disabled=true;$('#completion-status').textContent='確定済み24枚を照合しています…';
- try{const draft=await chainAPI('completion-draft',{publicKey:device.publicKey}),request=await signFinalizedCompletion(draft.value,device),issued=await chainAPI('completion-record',{request}),expected={show:config.show,policy:config.policy,authority:config.issuer},anchor=await prepareCompletionAnchor(issued.record,expected,device),finalized=await chainAPI('completion-anchor',{record:issued.record,request:anchor});
-  if(finalized.onChainAnchor!=='VERIFIED'||finalized.cNFT!=='NOT_VERIFIED'||finalized.nonTransferability!=='NOT_VERIFIED')throw Error('BAD_COMPLETION_RESULT');const view=settlementPresentation(config,finalized.signature),link=$('#completion-transaction');link.replaceChildren();if(view.url){const a=document.createElement('a');a.href=view.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='完成アンカー取引を開く';link.append(a);}else link.textContent=view.label;
-  const blob=URL.createObjectURL(new Blob([JSON.stringify({record:issued.record,anchor:finalized},null,2)],{type:'application/json'}));const download=$('#completion-download');download.href=blob;download.download='tonari-completion.json';download.hidden=false;$('#completion-status').textContent='署名済み完成記録と確定アンカーを検証しました。cNFT・非譲渡性は未検証です。';
+ try{const expected={show:config.show,policy:config.policy,authority:config.issuer},saved=await store.completion(config.show);let record,anchorRequest,previous;
+  if(saved){record=saved.record;anchorRequest=saved.request;previous=saved.anchor;await verifyCompletionAnchorRequest(anchorRequest,record,expected);}
+  else{const draft=await chainAPI('completion-draft',{publicKey:device.publicKey}),request=await signFinalizedCompletion(draft.value,device),issued=await chainAPI('completion-record',{request});record=issued.record;anchorRequest=await prepareCompletionAnchor(record,expected,device);await store.saveCompletion(config.show,{record,request:anchorRequest,anchor:null});}
+  const finalized=await chainAPI('completion-anchor',{record,request:anchorRequest});await verifyFinalizedCompletion(record,finalized,expected);
+  if(previous&&['signature','address','recordDigest'].some(field=>previous[field]!==finalized[field]))throw Error('COMPLETION_CONFLICT');
+  await store.saveCompletion(config.show,{record,request:anchorRequest,anchor:finalized});showCompletion(record,finalized);
  }finally{$('#create-completion').disabled=false;}
 }).catch(fail));
 window.addEventListener('focus',()=>sync.request(false));window.addEventListener('pageshow',()=>sync.start());
