@@ -12,7 +12,7 @@ Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:
 | 0:55–1:15 | Switch G21 between quiet and crowded in the operations view. | `stylised model` and `simulated crowd input`; 3% seat / 1% crowded / 18% quiet; recommendation switches; caps/governor visible. | Only not-yet-owned pieces are eligible. The deterministic tiers and caps fail closed. Do not call this a real sensor deployment. |
 | 1:15–1:35 | Open the program and `settle_swap` transaction in Solana Explorer. | Exact program and transaction IDs; Devnet badge. | The public Devnet transaction verifies both phone signatures through the Ed25519 precompile path. |
 | 1:35–1:51 | Run `npm test`; scroll the public repository and protocol docs. | Green count, commit, MIT license. | The R2p source passes 184 Node tests. Public-host browser evidence must be recorded again after integration. |
-| 1:51–2:00 | Show the evidence matrix and remaining-gates row. | cNFT/media/final review still open. | Prototype limits are explicit; completion is not claimed until every gate closes. |
+| 1:51–2:00 | Show the evidence matrix and remaining-gates row. | PDA fallback is live; cNFT/non-transferability are not claimed. Media/final review remain open. | Prototype limits are explicit; submission readiness is not claimed until every gate closes. |
 
 ## Capture requirements
 
