@@ -1,19 +1,17 @@
 import {signOffer,acceptOffer,inspectOffer,hex,fromHex} from '../../packages/protocol/swap.mjs';
 import {DeviceStore} from '../../packages/protocol/storage.mjs';
+import {seededStartingPieces} from '../../packages/protocol/picture-board.mjs';
+import {renderPictureBoard} from './picture-board.mjs';
 const id=Number(new URL(location.href).searchParams.get('client'));
 if(![0,1,2].includes(id)) throw new Error('BAD_CLIENT');
-const names=['あお','そら','はる'],symbols=['✦','◒','◇','◓','✧','○'];
+const names=['あお','そら','はる'];
 const show='11'.repeat(32);
 const $=s=>document.querySelector(s),send=m=>parent.postMessage(m,location.origin);
-let device,store,contacts=[],pending=null,sent=null,busy=false,records=[];
+let device,store,contacts=[],pending=null,sent=null,busy=false,records=[],pieces=[];
 $('#identity').textContent=names[id]+' の端末';
-for(let i=0;i<24;i++) {
-  const cell=document.createElement('div');cell.className='tile'+(i%8===id?' owned':'');cell.dataset.tile=String(i);
-  cell.textContent=i%8===id?symbols[(i+id)%symbols.length]:'·';$('#board').append(cell);
-}
 function error(e) { $('#status').textContent='確認できませんでした：'+e.message; }
 try {
-  store=await DeviceStore.open(`client-${id}`);device=store.device;records=await store.receipts(show);
+  store=await DeviceStore.open(`client-${id}`);device=store.device;pieces=[...await seededStartingPieces({show,device:device.publicKey})];renderPictureBoard($('#board'),pieces,Array.from({length:24},(_,i)=>i));$('#count').textContent=`${pieces.length} / 24`;records=await store.receipts(show);
   for(const r of records)markPending(r.offer.a===device.publicKey?r.offer.tileB:r.offer.tileA);
   const intent=await store.intent(show);
   if(intent) {
@@ -25,7 +23,7 @@ try {
     } catch(e) {if(e.message==='EXPIRED_OR_FUTURE')await store.saveIntent(show,null);else throw e;}
   }
   $('#key').textContent='端末の公開鍵 '+device.publicKey.slice(0,20)+'…';
-  $('#status').textContent='となりの端末を待っています。';send({type:'ready',publicKey:device.publicKey});
+  $('#status').textContent='となりの端末を待っています。';send({type:'ready',publicKey:device.publicKey,pieces});
 } catch(e) {device=null;$('#status').textContent='鍵と記録を安全に開けませんでした：'+e.message;}
 window.addEventListener('message',async event=>{
   if(event.origin!==location.origin||event.source!==parent||!device) return;
@@ -68,8 +66,9 @@ function markPending(tile) {
 $('#offer').addEventListener('click',async()=>{
   if(busy||sent||pending)return;busy=true;$('#offer').disabled=true;
   try {
-    const target=contacts.find(c=>c.id===(id+1)%3),now=Math.floor(Date.now()/1000);
-    const offer={show,a:device.publicKey,b:target.publicKey,tileA:id.toString(16).padStart(2,'0').repeat(32),tileB:target.id.toString(16).padStart(2,'0').repeat(32),nonce:hex(crypto.getRandomValues(new Uint8Array(16))),issuedAt:now,expiresAt:now+120};
+    const target=contacts.find(c=>c.id===(id+1)%3),now=Math.floor(Date.now()/1000),give=pieces.find(piece=>!target.pieces.includes(piece))??pieces[0],want=target.pieces.find(piece=>!pieces.includes(piece)&&piece!==give)??target.pieces.find(piece=>piece!==give);
+    if(!Number.isInteger(want))throw Error('交換できる組み合わせがありません');
+    const tile=n=>n.toString(16).padStart(2,'0').repeat(32),offer={show,a:device.publicKey,b:target.publicKey,tileA:tile(give),tileB:tile(want),nonce:hex(crypto.getRandomValues(new Uint8Array(16))),issuedAt:now,expiresAt:now+120};
     const signed=await signOffer(device,offer);
     await store.saveIntent(show,{direction:'sent',peer:target.id,signed});
     sent={to:target.id,signed};send({type:'offer',to:target.id,signed});

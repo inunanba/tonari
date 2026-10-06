@@ -7,11 +7,12 @@ const assert=require('node:assert/strict');
  page.on('pageerror',e=>errors.push(e.message));
  page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4173/'))external.push(r.url());});
  await page.goto('http://127.0.0.1:4173/apps/web/index.html');
- await page.getByText('3つの独立した鍵で準備完了。秘密鍵は各端末の中にあります。').waitFor();
+ await page.getByText(/3つの独立した鍵で準備完了。通常ピース \d+ は意図的な重なりです。/).waitFor();
  await page.waitForFunction(()=>document.documentElement.dataset.offlineReady==='true');
  const frames=page.frames().filter(f=>f.url().includes('phone.html'));
  assert.equal(frames.length,3);
  const keys=await Promise.all(frames.map(f=>f.locator('#key').innerText()));assert.equal(new Set(keys).size,3);
+ const starts=await Promise.all(frames.map(async f=>({owned:await f.locator('.picture-piece.owned').evaluateAll(nodes=>nodes.map(node=>Number(node.dataset.tile))),complete:await f.locator('#board').getAttribute('data-complete')})));for(const start of starts){assert.equal(start.owned.length,3);assert.equal(start.complete,'false');}assert.equal(starts[0].owned.filter(piece=>starts.slice(1).every(start=>start.owned.includes(piece))).length,1);
  // All assets already loaded. Disable HTTP network; postMessage transports only public signed bytes.
  await context.setOffline(true);
  await frames[0].locator('#offer').click();await frames[1].locator('#accept').waitFor({state:'visible'});
@@ -22,7 +23,7 @@ const assert=require('node:assert/strict');
  assert.equal(await frames[0].locator('.pending').count(),1);
  assert.equal(await frames[1].locator('.pending').count(),1);
  await page.reload();
- await page.getByText('3つの独立した鍵で準備完了。秘密鍵は各端末の中にあります。').waitFor();
+ await page.getByText(/3つの独立した鍵で準備完了。通常ピース \d+ は意図的な重なりです。/).waitFor();
  const restored=page.frames().filter(f=>f.url().includes('phone.html'));
  assert.deepEqual(await Promise.all(restored.map(f=>f.locator('#key').innerText())),keys);
  for(const i of [0,1]) {await restored[i].getByText('保存した仮受け取りを復元しました ✓').waitFor();assert.equal(await restored[i].locator('.pending').count(),1);}
