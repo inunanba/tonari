@@ -1,6 +1,6 @@
 # R2p owner-final pitch deltas
 
-Status: **COLOSSEUM SUBMITTED / EARN NOT SUBMITTED**. Compared with the R2k 1:53 script.
+Status: **BOTH SUBMITTED**. Compared with the R2k 1:53 script.
 
 - Replaced the complete narration in the owner's fixed six-part order: problem,
   idea, acquisition, completion, dispersal, mutual benefit.

@@ -1,11 +1,14 @@
 {
-  "status": "COLOSSEUM_SUBMITTED_EARN_PENDING_OWNER_SUBMIT",
+  "status": "BOTH_SUBMITTED",
   "approvals": {
     "owner_final_ok": true,
     "owner_final_ok_at": "2026-10-06T23:19:00+09:00",
     "colosseum_submit_approved": true,
     "colosseum_submitted_at": "2026-10-07T00:17:00+09:00",
-    "earn_submitted": false
+    "earn_submitted": true,
+    "earn_submitted_at": "2026-10-07T00:35:00+09:00",
+    "earn_submission_receipt": "Submission Received!",
+    "earn_listing": "https://superteam.fun/earn/listing/superteam-japan-x-enxross-by-tokyo-dome-side-track/"
   },
   "colosseum": {
     "project_name": "TONARI",
@@ -45,6 +48,6 @@
     "submitted_to_colosseum": "Yes",
     "colosseum_project": "https://colosseum.com/arena/projects/tonari",
     "colosseum_profile": "https://colosseum.com/arena/profiles/inunanba",
-    "earn_anything_else": "Public repository, live wallet-free judge route and Solana Devnet evidence are linked above. The entry is free, keepsake-only and uses original venue-neutral art. The owner will review the track-scope and Japan KYC acknowledgements before the human-only Earn submission."
+    "earn_anything_else": "Public repository, live wallet-free judge route and Solana Devnet evidence are linked above. The entry is free, keepsake-only and uses original venue-neutral art. The owner reviewed the track-scope and Japan KYC acknowledgements before the human-only Earn submission."
   }
 }

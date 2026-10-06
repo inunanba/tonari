@@ -1,6 +1,6 @@
 # TONARI — live-schema form answer kit
 
-Status: **COLOSSEUM SUBMITTED / EARN NOT SUBMITTED**. Exact machine-readable answers and limits are in `form-schema.json`. Colosseum receipt: https://colosseum.com/arena/projects/tonari (2026-10-07 00:17 JST).
+Status: **BOTH SUBMITTED**. Exact machine-readable answers and limits are in `form-schema.json`. Colosseum receipt: https://colosseum.com/arena/projects/tonari (2026-10-07 00:17 JST). Earn receipt: `Submission Received!` (2026-10-07 00:35 JST).
 
 ## Fixed facts
 
@@ -56,8 +56,8 @@ Status: **COLOSSEUM SUBMITTED / EARN NOT SUBMITTED**. Exact machine-readable ans
 | Link to your project's Colosseum profile | https://colosseum.com/arena/profiles/inunanba |
 | Anything Else? | `earn_anything_else` |
 
-At owner submit time, both required Earn checkboxes must be reviewed and ticked: track scope, and Japan KYC acknowledgement. Profile completeness and Japan-region eligibility must pass. Earn submit remains owner-only.
+At owner submit time, both required Earn checkboxes were reviewed and ticked: track scope, and Japan KYC acknowledgement. Earn submit was owner-only; its receipt is now recorded and does not authorize a repeat.
 
 ## Paste gate
 
-Colosseum submission is complete and must not be repeated. Before Earn paste/submit, recheck the replacement demo signed out, recheck the current Earn schema, preserve Work GO and obtain the required owner-only final click. If asked about tools or contributors, use the explicit truthful answers in `form-schema.json`.
+Colosseum and Earn submissions are complete and must not be repeated. Preserve the receipt evidence and perform only independent public/readback checks. If asked later about tools or contributors, use the explicit truthful answers in `form-schema.json`.

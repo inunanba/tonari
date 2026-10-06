@@ -22,5 +22,8 @@
   },
   "submission_authorized": false,
   "colosseum_submitted": true,
-  "earn_submitted": false
+  "earn_submitted": true,
+  "earn_submitted_at": "2026-10-07T00:35:00+09:00",
+  "earn_submission_receipt": "Submission Received!",
+  "earn_listing": "https://superteam.fun/earn/listing/superteam-japan-x-enxross-by-tokyo-dome-side-track/"
 }

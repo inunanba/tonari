@@ -1,6 +1,6 @@
 # TONARI — provisional integrated review
 
-Status: **WORK FINAL GO / COLOSSEUM SUBMITTED / EARN PENDING**. Public source, CI, Pages, live demo, media, owner Telegram, claims and hashes passed the integrated Work review. Owner final OK was recorded at 2026-10-06 23:19 JST; the owner-authorized Colosseum submission was recorded at 2026-10-07 00:17 JST.
+Status: **WORK FINAL GO / BOTH SUBMITTED**. Public source, CI, Pages, live demo, media, owner Telegram, claims and hashes passed the integrated Work review. Owner final OK was recorded at 2026-10-06 23:19 JST; Colosseum was submitted at 00:17 JST and Earn at 00:35 JST on 2026-10-07.
 
 | Criterion | Score | Evidence | Lost points / closure |
 |---|---:|---|---|
@@ -19,9 +19,9 @@ Status: **WORK FINAL GO / COLOSSEUM SUBMITTED / EARN PENDING**. Public source, C
 - Signed-out checks passed for the public repository, judge route, pitch and demo. Media duration evidence is 1:58 and 1:54, within the stated limits.
 - Claims remain bounded: cNFT and non-transferability are `NOT_VERIFIED`; completion is the disclosed signed Devnet PDA fallback.
 - Colosseum gate is closed: project https://colosseum.com/arena/projects/tonari and profile https://colosseum.com/arena/profiles/inunanba are recorded. Do not repeat submission.
-- Required next gate: fresh signed-out check of replacement demo `eZR5a1Bb414`, then owner-only Superteam Earn submit and receipt capture.
+- Both submission gates are closed. Do not repeat either submission. A fresh signed-out check of replacement demo `eZR5a1Bb414` remains useful independent evidence, not a submission prerequisite.
 
-Run `node tools/check-submission-readiness.mjs`. A zero exit confirms the recorded source is internally consistent; it does not authorize another external action. The machine result keeps `submissionAuthorized=false`, records `colosseumSubmitted=true`, and keeps `earnSubmitted=false` until an Earn receipt exists.
+Run `node tools/check-submission-readiness.mjs`. A zero exit confirms the recorded source is internally consistent; it does not authorize another external action. The machine result keeps `submissionAuthorized=false`, records both submissions as true, and emits `currentStage=BOTH_SUBMITTED`.
 
 ## Permanent truth boundary
 

@@ -5,16 +5,16 @@ import {assessSubmissionReadiness} from '../tools/check-submission-readiness.mjs
 
 const schema=JSON.parse(await readFile(new URL('../submission/form-schema.json',import.meta.url),'utf8'));
 
-test('submission readiness records the consumed Colosseum authorization and keeps Earn pending',()=>{
+test('submission readiness records both completed submissions without reopening authority',()=>{
   const result=assessSubmissionReadiness(schema);
   assert.equal(result.verdict,'READY_FOR_WORK_FINAL_REVIEW');
-  assert.equal(result.currentStage,'COLOSSEUM_SUBMITTED_EARN_OWNER_SUBMIT_PENDING');
+  assert.equal(result.currentStage,'BOTH_SUBMITTED');
   assert.deepEqual(result.blockers,[]);
   assert.deepEqual(result.postSubmissionEvidencePending,[]);
   assert.equal(result.ownerFinalOk,true);
   assert.equal(result.submissionAuthorized,false);
   assert.equal(result.colosseumSubmitted,true);
-  assert.equal(result.earnSubmitted,false);
+  assert.equal(result.earnSubmitted,true);
   assert.equal(result.cNFT,'NOT_VERIFIED');
   assert.equal(result.nonTransferability,'NOT_VERIFIED');
 });

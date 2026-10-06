@@ -28,7 +28,7 @@ export function assessSubmissionReadiness(schema){
   const earnSubmitted=schema?.approvals?.earn_submitted===true;
   return Object.freeze({
     verdict:blockers.length?'FULL_NO_GO':'READY_FOR_WORK_FINAL_REVIEW',
-    currentStage:colosseumSubmitted&&!earnSubmitted?'COLOSSEUM_SUBMITTED_EARN_OWNER_SUBMIT_PENDING':'PRE_SUBMISSION_REVIEW',
+    currentStage:colosseumSubmitted&&earnSubmitted?'BOTH_SUBMITTED':colosseumSubmitted?'COLOSSEUM_SUBMITTED_EARN_OWNER_SUBMIT_PENDING':'PRE_SUBMISSION_REVIEW',
     blockers:Object.freeze(blockers),
     postSubmissionEvidencePending:Object.freeze(postSubmissionEvidencePending),
     ownerFinalOk,

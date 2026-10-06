@@ -1,6 +1,6 @@
 # TONARI — claim-to-evidence and submission gates
 
-Status: **COLOSSEUM SUBMITTED / EARN PENDING OWNER SUBMIT**. This table is the source of truth for what media and forms may say; it grants no new submission authority.
+Status: **BOTH SUBMITTED**. This table is the source of truth for what media and forms may say; it grants no new submission authority or permission to repeat either submission.
 
 | Claim | Level | Evidence | Allowed wording / boundary |
 |---|---|---|---|
@@ -15,9 +15,9 @@ Status: **COLOSSEUM SUBMITTED / EARN PENDING OWNER SUBMIT**. This table is the s
 | Physical phones / real camera / battery | Unproven | none | Do not claim. Three-phone view is browser emulation. |
 | Completion PDA fallback | Proven on Devnet, with point loss | signed portable record + finalized PDA/readback; R2o/R2m evidence | Say “signed completion record anchored to a Devnet PDA.” It is **not** a cNFT/token and does not prove non-transferability. |
 | Completion cNFT/non-transferable keepsake | Not implemented | no accepted cNFT/non-transferability evidence | Do not claim implemented, minted, non-transferable or wallet-readable. This is a recorded score loss, not a hidden claim. |
-| Public pitch and demo videos | Pitch signed-out proven; replacement demo receipt-bound, recheck pending | Pitch `FS4sn8_zRHU` (1:58); current demo `eZR5a1Bb414` (2:04), owner-approved R2u render used in Colosseum receipt | Former demo `yHdKe_2xoMI` is obsolete. Recheck current demo signed out before Earn. |
+| Public pitch and demo videos | Pitch signed-out proven; replacement demo receipt-bound, recheck pending | Pitch `FS4sn8_zRHU` (1:58); current demo `eZR5a1Bb414` (2:04), owner-approved R2u render used in Colosseum receipt | Former demo `yHdKe_2xoMI` is obsolete. Signed-out replacement-demo recheck remains independent post-submission evidence. |
 | Colosseum submission | **Submitted** | Status “Submitted” at 2026-10-07 00:17 JST; project ID 15996; project/profile URLs recorded by Sena | Do not repeat submission. Public project availability is a separate verification from the authenticated receipt. |
-| Superteam Earn submission | **Pending owner submit** | Colosseum receipt satisfies the prerequisite; no Earn receipt yet | Owner reviews/ticks the required Japan KYC and track-scope acknowledgements and performs the human-only submit. |
+| Superteam Earn submission | **Submitted** | Owner completed the human-only submit at 2026-10-07 00:35 JST; screen showed `Submission Received!`; listing recorded one submission | Do not repeat submission. KYC is a later winner-only process and is not claimed complete. |
 
 ## GO gates
 
@@ -34,12 +34,12 @@ Status: **COLOSSEUM SUBMITTED / EARN PENDING OWNER SUBMIT**. This table is the s
 - [x] Owner final OK (2026-10-06 23:19 JST).
 - [x] Colosseum owner-authorized submission receipt and project/profile URLs.
 - [ ] Replacement demo signed-out recheck.
-- [ ] Superteam Earn owner submit and receipt.
+- [x] Superteam Earn owner submit and receipt (2026-10-07 00:35 JST; `Submission Received!`).
 
-The current machine-readable preflight is `node tools/check-submission-readiness.mjs`. It records Colosseum as submitted and Earn as pending. `submissionAuthorized` remains false because the prior Colosseum authorization was consumed and the remaining Earn click is owner-only.
+The current machine-readable preflight is `node tools/check-submission-readiness.mjs`. It records the `BOTH_SUBMITTED` stage. `submissionAuthorized` remains false because both one-time authorizations were consumed; no repeat submission is permitted.
 
 Owner-supplied Telegram is a hard Colosseum form gate. Work defaults accelerator opt-in to No and mobile-focused dApp to Yes; both remain editable before paste.
 
 ## Residual ownership
 
-Work owns source, scripts, form drafts, tests, evidence review and final GO/NO-GO. Bot owns public recordings, verified VOICEVOX render, uploads, actual-form capture/paste, public integration and submission after authorization. The owner owns final OK and the Earn submit click. No document in this directory grants submission authority.
+Work owns source, scripts, form drafts, tests, evidence review and final GO/NO-GO. Bot owns public recordings, verified VOICEVOX render, uploads and public integration. Both submissions are complete; the owner performed the Earn-only acknowledgements and submit click. No document in this directory grants new or repeat submission authority.

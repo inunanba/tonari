@@ -1,6 +1,6 @@
 # TONARI — final technical demo evidence
 
-Status: **COLOSSEUM SUBMITTED / EARN NOT SUBMITTED**. Current uploaded duration: 2:04. Current URL: https://youtu.be/eZR5a1Bb414. This owner-approved R2u cut was used for the Colosseum receipt; a fresh signed-out Work recheck remains pending.
+Status: **BOTH SUBMITTED**. Current uploaded duration: 2:04. Current URL: https://youtu.be/eZR5a1Bb414. This owner-approved R2u cut was used for the Colosseum submission; a fresh signed-out Work recheck remains pending as independent evidence.
 
 Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:00; the current 2:04 cut is within that limit.
 
@@ -25,4 +25,4 @@ Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:
 
 ## Published render evidence
 
-The former URL `yHdKe_2xoMI` is obsolete. The owner-approved R2u render at https://youtu.be/eZR5a1Bb414 is recorded as 2:04 and was used in the owner-authorized Colosseum submission at 2026-10-07 00:17 JST. Fresh signed-out title/channel/duration verification is still required before Earn submission; do not infer it from the receipt alone.
+The former URL `yHdKe_2xoMI` is obsolete. The owner-approved R2u render at https://youtu.be/eZR5a1Bb414 is recorded as 2:04 and was used in the owner-authorized Colosseum submission at 2026-10-07 00:17 JST. Earn was submitted at 00:35 JST. Fresh signed-out title/channel/duration verification remains pending and must not be inferred from either receipt.
