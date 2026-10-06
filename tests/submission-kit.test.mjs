@@ -10,7 +10,7 @@ const mediaEvidence=JSON.parse(await load('public-media-evidence.json'));
 test('submission kit retains truthful status and authority boundaries',async()=>{
   for(const name of names){
     const text=await load(name);
-    assert.match(text,/(DRAFT|FULL NO-GO)/,name);
+    assert.match(text,/(DRAFT|WORK FINAL GO)/,name);
     assert.match(text,/(NOT SUBMITTED|submission authority|submit)/i,name);
   }
   const all=(await Promise.all(names.map(load))).join('\n');
@@ -54,7 +54,7 @@ test('media URLs are exact while receipt and approval gates fail closed',async()
   assert.match(matrix,/Completion cNFT.*Not implemented/i);
   assert.match(matrix,/cNFT\/non-transferability kept `NOT_VERIFIED`/i);
   assert.match(matrix,/Media gate is closed/);
-  assert.match(matrix,/\[ \] Work final integrated score and GO/);
+  assert.match(matrix,/\[x\] Work final integrated score and GO/);
   assert.match(matrix,/\[ \] Owner final OK/);
   assert.equal(mediaEvidence.pitch.url,c.pitch_video);
   assert.equal(mediaEvidence.demo.url,c.demo_video);

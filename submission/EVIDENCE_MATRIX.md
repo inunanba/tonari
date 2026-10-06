@@ -1,6 +1,6 @@
 # TONARI — claim-to-evidence and submission gates
 
-Status: **FULL NO-GO**. This table is the source of truth for what media and forms may say.
+Status: **WORK FINAL GO / AWAITING OWNER FINAL OK**. This table is the source of truth for what media and forms may say; it grants no submission authority.
 
 | Claim | Level | Evidence | Allowed wording / boundary |
 |---|---|---|---|
@@ -8,7 +8,7 @@ Status: **FULL NO-GO**. This table is the source of truth for what media and for
 | Offline dual-signature exchange | Proven in browser harness | rally/QR/storage/browser evidence | Say “genuine Ed25519 signatures”; do not imply two physical phones. |
 | Public Solana program | Proven on Devnet | program `2XaNub…63iA`, deploy record | Always say Devnet/prototype; authority is not immutable. |
 | Dual-signature `settle_swap` | Proven on Devnet | tx `qfTeQ1…T7Zd` | May say public settlement; committed frontend/relay limitations remain documented. |
-| Actual Chrome quality gate | Proven through R2p | 184/184 Node; Chrome gates 10/10; local validator 34/34; PR #32/main `fdacfef3` | The earlier 4.2 s figure is harness wall time, not human completion time. |
+| Actual Chrome quality gate | Proven through R2v | 189/189 Node; Chrome gates 10/10; local validator 34/34; PR #35/main `e4fa3361` | The earlier 4.2 s figure is harness wall time, not human completion time. |
 | Three-tier missing-piece and queue-offer behavior | Proven only as deterministic demo/model | tiered-chance tests and operations browser | Say 3% seat / 1% crowded / 18% quiet, simulated crowd input / stylised model; never real crowd control. |
 | −26%, 2.0 min, zero base-case herding | Model output | checked-in simulator research/golden vectors | Say simulation result, not measured venue impact. |
 | Users, venue partnership, pilot, revenue | Unproven | none | State none; pilot is a proposal. |
@@ -16,7 +16,7 @@ Status: **FULL NO-GO**. This table is the source of truth for what media and for
 | Completion PDA fallback | Proven on Devnet, with point loss | signed portable record + finalized PDA/readback; R2o/R2m evidence | Say “signed completion record anchored to a Devnet PDA.” It is **not** a cNFT/token and does not prove non-transferability. |
 | Completion cNFT/non-transferable keepsake | Not implemented | no accepted cNFT/non-transferability evidence | Do not claim implemented, minted, non-transferable or wallet-readable. This is a recorded score loss, not a hidden claim. |
 | Public pitch and demo videos | Proven reachable signed out | YouTube unlisted `FS4sn8_zRHU` (1:58) and `yHdKe_2xoMI` (1:54), owner upload + Work fresh-browser check | Media gate is closed; upload does not authorize submission. |
-| Submission | **Open blocker** | no Colosseum/Earn URLs or receipts | Drafts and uploaded videos are not submission. |
+| Submission | **Post-submit evidence pending** | no Colosseum/Earn URLs or receipts | Drafts and uploaded videos are not submission; these URLs can only be captured after the owner-authorized submit action. |
 
 ## GO gates
 
@@ -28,12 +28,12 @@ Status: **FULL NO-GO**. This table is the source of truth for what media and for
 - [x] Public technical demo ≤2:00.
 - [x] Owner Telegram supplied and wired without invention.
 - [x] Actual Superteam and Colosseum form fields/limits captured; all currently available fields completed without invention.
-- [ ] Fresh-browser link check, final tests, adversarial claim review and current evidence hashes.
-- [ ] Work final integrated score and GO.
+- [x] Fresh-browser link check, final tests, adversarial claim review and current evidence hashes.
+- [x] Work final integrated score and GO for owner review.
 - [ ] Owner final OK.
 - [ ] Bot/owner submission receipts.
 
-The current machine-readable preflight is `node tools/check-submission-readiness.mjs`. Media and owner-field gates are now closed, but it remains fail-closed until every receipt-dependent placeholder is replaced with independently checked evidence.
+The current machine-readable preflight is `node tools/check-submission-readiness.mjs`. It separates pre-submit blockers from receipt evidence that cannot exist until after submission. `READY_FOR_WORK_FINAL_REVIEW` never grants owner approval or submission authority; post-submit URLs must still be captured and independently checked.
 
 Owner-supplied Telegram is a hard Colosseum form gate. Work defaults accelerator opt-in to No and mobile-focused dApp to Yes; both remain editable before paste.
 
