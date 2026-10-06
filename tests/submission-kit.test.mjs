@@ -66,11 +66,11 @@ test('logo source is original, venue-neutral and raster export exists',async()=>
 
 test('pitch centres collection desire while labelling future benefits',async()=>{
   const pitch=await load('PITCH_2MIN_JA_EN.md');
-  assert.match(pitch,/推しの絵を揃えたい/);
-  assert.match(pitch,/空いている場所では最も高く/);
-  assert.match(pitch,/混雑中は控えめ/);
-  assert.match(pitch,/記念の完成絵と、署名された完成記録/);
-  assert.match(pitch,/提案.*実在の提携ではありません/);
+  assert.match(pitch,/推しのものを集めたい、そろえたい/);
+  assert.match(pitch,/空いているエリアほど手に入りやすく/);
+  assert.match(pitch,/混雑しているエリアでは控えめ/);
+  assert.match(pitch,/記念の完成絵と「完成した記録」/);
+  assert.match(pitch,/提案 \/ proposal — no existing artist or venue partnership/);
   assert.match(pitch,/Roadmap only/i);
   assert.match(pitch,/cNFT and non-transferability remain open/);
   assert.doesNotMatch(pitch,/最悪待ち時間/);
@@ -82,9 +82,23 @@ test('R2p pitch keeps the owner-fixed order and current tier truth boundaries',a
   let cursor=-1;
   for(const heading of ordered){const next=pitch.indexOf(heading);assert(next>cursor,`${heading} must appear in fixed order`);cursor=next;}
   assert.match(pitch,/3%/);assert.match(pitch,/1%/);assert.match(pitch,/18%/);
-  assert.match(pitch,/未所持/);assert.match(pitch,/模擬/);
+  assert.match(pitch,/まだ持っていないピース/);assert.match(pitch,/今回のデモでは運営画面で混雑を設定/);
   assert.match(pitch,/Roadmap only:[\s\S]*cameras/i);
   assert.doesNotMatch(pitch,/(レア|rare piece)/i);
   assert.match(form,/3%/);assert.match(form,/1%/);assert.match(form,/18%/);
   assert.match(form,/camera.*roadmap/i);
+});
+
+test('owner-final Japanese pitch is preserved verbatim without the R2r omissions',async()=>{
+  const pitch=await load('PITCH_2MIN_JA_EN.md');
+  const required=[
+    '人はお願いでは動かないけど、欲しいものがあれば自分から動きます。',
+    '会場に来るファンには「推しのものを集めたい、そろえたい」という気持ちがあります。',
+    '全員が一斉に動くのではなく、一部の人が少しずつ動くことで、会場全体の混雑がならされます。',
+    '今回のデモでは運営画面で混雑を設定していますが、将来は会場のカメラで人の動きを読み取り、混雑に合わせて手に入りやすい場所を自動で変えるような使い方もできます。'
+  ];
+  for(const line of required)assert.ok(pitch.includes(line),`missing owner-final line: ${line}`);
+  assert.match(pitch,/owner-final 2026-10-06 12:35 JST script verbatim/);
+  assert.match(pitch,/1:58\.30/);
+  assert.match(pitch,/提案 \/ proposal — no existing artist or venue partnership/);
 });
