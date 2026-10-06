@@ -1,6 +1,6 @@
 # TONARI — provisional integrated review
 
-Status: **WORK FINAL GO FOR OWNER REVIEW**. Public source, CI, Pages, live demo, media, owner Telegram, claims and hashes have passed the integrated Work review. This is not owner final OK and does not authorize submission.
+Status: **WORK FINAL GO / COLOSSEUM SUBMITTED / EARN PENDING**. Public source, CI, Pages, live demo, media, owner Telegram, claims and hashes passed the integrated Work review. Owner final OK was recorded at 2026-10-06 23:19 JST; the owner-authorized Colosseum submission was recorded at 2026-10-07 00:17 JST.
 
 | Criterion | Score | Evidence | Lost points / closure |
 |---|---:|---|---|
@@ -18,9 +18,10 @@ Status: **WORK FINAL GO FOR OWNER REVIEW**. Public source, CI, Pages, live demo,
 - Independent Bot evidence: PR #35 merged; Exact9 public readback 9/9; Node 189/189; protocol run `37460978692` and Pages run `37460978631` succeeded.
 - Signed-out checks passed for the public repository, judge route, pitch and demo. Media duration evidence is 1:58 and 1:54, within the stated limits.
 - Claims remain bounded: cNFT and non-transferability are `NOT_VERIFIED`; completion is the disclosed signed Devnet PDA fallback.
-- Required next gate: owner final OK. Only after that may Bot/owner paste and submit the forms, then capture and verify the four receipt-dependent fields.
+- Colosseum gate is closed: project https://colosseum.com/arena/projects/tonari and profile https://colosseum.com/arena/profiles/inunanba are recorded. Do not repeat submission.
+- Required next gate: fresh signed-out check of replacement demo `eZR5a1Bb414`, then owner-only Superteam Earn submit and receipt capture.
 
-Run `node tools/check-submission-readiness.mjs`. A zero exit means only that pre-submit evidence is ready for Work review. `ownerFinalOk` and `submissionAuthorized` remain false in the machine result, and receipt-dependent fields remain listed separately until the authorized submission occurs.
+Run `node tools/check-submission-readiness.mjs`. A zero exit confirms the recorded source is internally consistent; it does not authorize another external action. The machine result keeps `submissionAuthorized=false`, records `colosseumSubmitted=true`, and keeps `earnSubmitted=false` until an Earn receipt exists.
 
 ## Permanent truth boundary
 

@@ -1,8 +1,8 @@
-# TONARI — 2-minute technical demo shot list
+# TONARI — final technical demo evidence
 
-Status: **DRAFT / UPLOADED UNLISTED / NOT SUBMITTED**. Uploaded duration: 1:54. This cut shows evidence, not a feature montage. Signed-out URL: https://youtu.be/yHdKe_2xoMI.
+Status: **COLOSSEUM SUBMITTED / EARN NOT SUBMITTED**. Current uploaded duration: 2:04. Current URL: https://youtu.be/eZR5a1Bb414. This owner-approved R2u cut was used for the Colosseum receipt; a fresh signed-out Work recheck remains pending.
 
-Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:00, but this stronger cut stays at 2:00.
+Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:00; the current 2:04 cut is within that limit.
 
 | Time | Action | Evidence on screen | Spoken point |
 |---|---|---|---|
@@ -25,4 +25,4 @@ Upload only to YouTube, Loom or Vimeo. Colosseum permits a product demo up to 3:
 
 ## Published render evidence
 
-YouTube unlisted URL https://youtu.be/yHdKe_2xoMI was reachable signed out on 2026-10-06 and reported the expected title, EpicForge Studio channel and 1:54 duration. Local source SHA-256 begins `babcda22`. Uploading the media grants no submission authority.
+The former URL `yHdKe_2xoMI` is obsolete. The owner-approved R2u render at https://youtu.be/eZR5a1Bb414 is recorded as 2:04 and was used in the owner-authorized Colosseum submission at 2026-10-07 00:17 JST. Fresh signed-out title/channel/duration verification is still required before Earn submission; do not infer it from the receipt alone.

@@ -1,6 +1,6 @@
 # TONARI — owner-final two-minute pitch
 
-Status: **DRAFT / UPLOADED UNLISTED / NOT SUBMITTED**. The owner-final Japanese narration is fixed verbatim below. The local source is **1:58.30** and YouTube reports **1:58**; the Colosseum field limit is 2:00. Japanese VOICEVOX narration with burnt-in English subtitles and `VOICEVOX:四国めたん` credit. Signed-out URL: https://youtu.be/FS4sn8_zRHU.
+Status: **UPLOADED UNLISTED / COLOSSEUM SUBMITTED / EARN NOT SUBMITTED**. The owner-final Japanese narration is fixed verbatim below. The local source is **1:58.30** and YouTube reports **1:58**; the Colosseum field limit is 2:00. Japanese VOICEVOX narration with burnt-in English subtitles and `VOICEVOX:四国めたん` credit. Signed-out URL: https://youtu.be/FS4sn8_zRHU.
 
 ## Truth boundary
 

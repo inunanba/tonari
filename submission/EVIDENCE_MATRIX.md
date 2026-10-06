@@ -1,6 +1,6 @@
 # TONARI — claim-to-evidence and submission gates
 
-Status: **WORK FINAL GO / AWAITING OWNER FINAL OK**. This table is the source of truth for what media and forms may say; it grants no submission authority.
+Status: **COLOSSEUM SUBMITTED / EARN PENDING OWNER SUBMIT**. This table is the source of truth for what media and forms may say; it grants no new submission authority.
 
 | Claim | Level | Evidence | Allowed wording / boundary |
 |---|---|---|---|
@@ -15,8 +15,9 @@ Status: **WORK FINAL GO / AWAITING OWNER FINAL OK**. This table is the source of
 | Physical phones / real camera / battery | Unproven | none | Do not claim. Three-phone view is browser emulation. |
 | Completion PDA fallback | Proven on Devnet, with point loss | signed portable record + finalized PDA/readback; R2o/R2m evidence | Say “signed completion record anchored to a Devnet PDA.” It is **not** a cNFT/token and does not prove non-transferability. |
 | Completion cNFT/non-transferable keepsake | Not implemented | no accepted cNFT/non-transferability evidence | Do not claim implemented, minted, non-transferable or wallet-readable. This is a recorded score loss, not a hidden claim. |
-| Public pitch and demo videos | Proven reachable signed out | YouTube unlisted `FS4sn8_zRHU` (1:58) and `yHdKe_2xoMI` (1:54), owner upload + Work fresh-browser check | Media gate is closed; upload does not authorize submission. |
-| Submission | **Post-submit evidence pending** | no Colosseum/Earn URLs or receipts | Drafts and uploaded videos are not submission; these URLs can only be captured after the owner-authorized submit action. |
+| Public pitch and demo videos | Pitch signed-out proven; replacement demo receipt-bound, recheck pending | Pitch `FS4sn8_zRHU` (1:58); current demo `eZR5a1Bb414` (2:04), owner-approved R2u render used in Colosseum receipt | Former demo `yHdKe_2xoMI` is obsolete. Recheck current demo signed out before Earn. |
+| Colosseum submission | **Submitted** | Status “Submitted” at 2026-10-07 00:17 JST; project ID 15996; project/profile URLs recorded by Sena | Do not repeat submission. Public project availability is a separate verification from the authenticated receipt. |
+| Superteam Earn submission | **Pending owner submit** | Colosseum receipt satisfies the prerequisite; no Earn receipt yet | Owner reviews/ticks the required Japan KYC and track-scope acknowledgements and performs the human-only submit. |
 
 ## GO gates
 
@@ -25,15 +26,17 @@ Status: **WORK FINAL GO / AWAITING OWNER FINAL OK**. This table is the source of
 - [x] Public Devnet program and dual-signature swap evidence.
 - [x] Owner-approved honestly labelled completion-PDA fallback shipped, with cNFT/non-transferability kept `NOT_VERIFIED` and point loss recorded.
 - [x] Public pitch video ≤2:00 on YouTube, Loom or Vimeo; verified voice credit and burnt-in English subtitles.
-- [x] Public technical demo ≤2:00.
+- [x] Public technical demo 2:04, within Colosseum's ≤3:00 limit.
 - [x] Owner Telegram supplied and wired without invention.
 - [x] Actual Superteam and Colosseum form fields/limits captured; all currently available fields completed without invention.
 - [x] Fresh-browser link check, final tests, adversarial claim review and current evidence hashes.
 - [x] Work final integrated score and GO for owner review.
-- [ ] Owner final OK.
-- [ ] Bot/owner submission receipts.
+- [x] Owner final OK (2026-10-06 23:19 JST).
+- [x] Colosseum owner-authorized submission receipt and project/profile URLs.
+- [ ] Replacement demo signed-out recheck.
+- [ ] Superteam Earn owner submit and receipt.
 
-The current machine-readable preflight is `node tools/check-submission-readiness.mjs`. It separates pre-submit blockers from receipt evidence that cannot exist until after submission. `READY_FOR_WORK_FINAL_REVIEW` never grants owner approval or submission authority; post-submit URLs must still be captured and independently checked.
+The current machine-readable preflight is `node tools/check-submission-readiness.mjs`. It records Colosseum as submitted and Earn as pending. `submissionAuthorized` remains false because the prior Colosseum authorization was consumed and the remaining Earn click is owner-only.
 
 Owner-supplied Telegram is a hard Colosseum form gate. Work defaults accelerator opt-in to No and mobile-focused dApp to Yes; both remain editable before paste.
 
