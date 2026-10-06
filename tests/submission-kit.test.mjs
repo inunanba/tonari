@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const names=['PITCH_2MIN_JA_EN.md','TECH_DEMO_2MIN.md','FORM_ANSWERS.md','EVIDENCE_MATRIX.md'];
+const names=['PITCH_2MIN_JA_EN.md','TECH_DEMO_2MIN.md','FORM_ANSWERS.md','EVIDENCE_MATRIX.md','SCRIPT_DELTAS.md'];
 const load=async name=>readFile(new URL(`../submission/${name}`,import.meta.url),'utf8');
 const schema=JSON.parse(await load('form-schema.json'));
 
@@ -60,4 +60,16 @@ test('logo source is original, venue-neutral and raster export exists',async()=>
   assert.doesNotMatch(svg,/Tokyo|Dome|artist|sponsor/i);
   assert.deepEqual([...png.subarray(0,8)],[137,80,78,71,13,10,26,10]);
   assert.ok(png.length<500_000,`logo too large: ${png.length}`);
+});
+
+test('pitch centres collection desire while labelling future benefits',async()=>{
+  const pitch=await load('PITCH_2MIN_JA_EN.md');
+  assert.match(pitch,/推しの絵を揃えたい/);
+  assert.match(pitch,/静かな場所/);
+  assert.match(pitch,/新しい人だかりを防ぎます/);
+  assert.match(pitch,/記念の完成絵と完了記録/);
+  assert.match(pitch,/提案.*実在の提携ではありません/);
+  assert.match(pitch,/ロードマップ/);
+  assert.match(pitch,/cNFT\/on-chain non-transferability remains open/);
+  assert.doesNotMatch(pitch,/最悪待ち時間/);
 });
