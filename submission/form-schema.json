@@ -1,5 +1,15 @@
 {
-  "status": "WORK_FINAL_GO_AWAITING_OWNER_OK",
+  "status": "BOTH_SUBMITTED",
+  "approvals": {
+    "owner_final_ok": true,
+    "owner_final_ok_at": "2026-10-06T23:19:00+09:00",
+    "colosseum_submit_approved": true,
+    "colosseum_submitted_at": "2026-10-07T00:17:00+09:00",
+    "earn_submitted": true,
+    "earn_submitted_at": "2026-10-07T00:35:00+09:00",
+    "earn_submission_receipt": "Submission Received!",
+    "earn_listing": "https://superteam.fun/earn/listing/superteam-japan-x-enxross-by-tokyo-dome-side-track/"
+  },
   "colosseum": {
     "project_name": "TONARI",
     "brief_description": "Wallet-free offline neighbour play that turns venue rewards into a verifiable, safety-bounded crowd-control lever on Solana.",
@@ -19,7 +29,7 @@
     "logo": "submission/tonari-logo.png",
     "github": "https://github.com/inunanba/tonari",
     "repo_context": "MIT monorepo with an offline PWA, signed QR protocol, allocator/games, Anchor program, relayer, tests and evidence docs. The judge path is wallet-free. Exact limitations are tracked in submission/EVIDENCE_MATRIX.md. Development began during this hackathon; prior-art references are acknowledged.",
-    "demo_video": "https://youtu.be/yHdKe_2xoMI",
+    "demo_video": "https://youtu.be/eZR5a1Bb414",
     "demo_max_seconds": 180,
     "live_product_link": "https://inunanba.github.io/tonari/apps/web/judge.html",
     "access_instructions": "Open in a fresh mobile or desktop browser. No wallet or login. Follow steps 1–6. The scripted neighbour and sensor feed are labelled simulations; Explorer links are real Devnet evidence.",
@@ -27,7 +37,7 @@
     "pitch_max_seconds": 120
   },
   "earn": {
-    "submission_link": "<COLOSSEUM_PROJECT_URL_AFTER_SUBMISSION>",
+    "submission_link": "https://colosseum.com/arena/projects/tonari",
     "tweet_link": "",
     "project_name": "TONARI",
     "earn_project_description": "TONARI is a wallet-free offline neighbour experience for low-signal venue queues. Phones co-sign piece swaps, play two brief games and later settle the same Ed25519 identities on Solana. A deterministic capped model gives nonzero progress at a seat, a lower chance in crowded areas and the highest chance in quiet areas, always for a not-yet-owned piece; swapping remains central. Crowd input is simulated and camera switching is roadmap only. Public Devnet program and settlement evidence exist; crowd results are not field data. The proposed model is a signage-only venue pilot. No users, venue partnership or production deployment are claimed.",
@@ -35,9 +45,9 @@
     "website": "https://inunanba.github.io/tonari/apps/web/judge.html",
     "x_link": "",
     "pitch": "https://youtu.be/FS4sn8_zRHU",
-    "submitted_to_colosseum": "<SET_YES_ONLY_AFTER_COLOSSEUM_RECEIPT>",
-    "colosseum_project": "<COLOSSEUM_PROJECT_URL_AFTER_SUBMISSION>",
-    "colosseum_profile": "<COLOSSEUM_PROFILE_URL>",
-    "earn_anything_else": "Public repository, live wallet-free judge route and Solana Devnet evidence are linked above. The entry is free, keepsake-only and uses original venue-neutral art. The owner will review the track-scope and Japan KYC acknowledgements before the human-only Earn submission."
+    "submitted_to_colosseum": "Yes",
+    "colosseum_project": "https://colosseum.com/arena/projects/tonari",
+    "colosseum_profile": "https://colosseum.com/arena/profiles/inunanba",
+    "earn_anything_else": "Public repository, live wallet-free judge route and Solana Devnet evidence are linked above. The entry is free, keepsake-only and uses original venue-neutral art. The owner reviewed the track-scope and Japan KYC acknowledgements before the human-only Earn submission."
   }
 }

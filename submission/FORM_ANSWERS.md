@@ -1,6 +1,6 @@
 # TONARI — live-schema form answer kit
 
-Status: **DRAFT / MEDIA AND TELEGRAM READY / NOT SUBMITTED**. Exact machine-readable answers and limits are in `form-schema.json`. Colosseum must be submitted before Earn eligibility answer “Yes.”
+Status: **BOTH SUBMITTED**. Exact machine-readable answers and limits are in `form-schema.json`. Colosseum receipt: https://colosseum.com/arena/projects/tonari (2026-10-07 00:17 JST). Earn receipt: `Submission Received!` (2026-10-07 00:35 JST).
 
 ## Fixed facts
 
@@ -13,7 +13,7 @@ Status: **DRAFT / MEDIA AND TELEGRAM READY / NOT SUBMITTED**. Exact machine-read
 - Telegram: `@hiyoko0329` — supplied by the owner on 2026-10-06.
 - Logo: `submission/tonari-logo.png` (original, venue-neutral).
 - Pitch: https://youtu.be/FS4sn8_zRHU (1:58, YouTube unlisted; signed-out browser checked 2026-10-06).
-- Technical demo: https://youtu.be/yHdKe_2xoMI (1:54, YouTube unlisted; signed-out browser checked 2026-10-06).
+- Technical demo: https://youtu.be/eZR5a1Bb414 (2:04, YouTube unlisted; owner-approved R2u render used for Colosseum submission; fresh signed-out recheck pending).
 
 ## Colosseum fields
 
@@ -35,7 +35,7 @@ Status: **DRAFT / MEDIA AND TELEGRAM READY / NOT SUBMITTED**. Exact machine-read
 | Accelerator | No (owner may revise before paste) |
 | Logo | `tonari-logo.png` |
 | GitHub / repo context (500) | repository / `repo_context` |
-| Demo video | https://youtu.be/yHdKe_2xoMI (1:54) |
+| Demo video | https://youtu.be/eZR5a1Bb414 (2:04, within Colosseum's 3:00 limit) |
 | Live product / access instructions (300) | live URL / `access_instructions` |
 | Pitch video | https://youtu.be/FS4sn8_zRHU (1:58, **≤2:00**) |
 
@@ -43,7 +43,7 @@ Status: **DRAFT / MEDIA AND TELEGRAM READY / NOT SUBMITTED**. Exact machine-read
 
 | Exact field | Answer |
 |---|---|
-| Link to Your Submission | Colosseum project URL after submission; GitHub is the temporary fallback |
+| Link to Your Submission | https://colosseum.com/arena/projects/tonari |
 | Tweet Link | Blank |
 | Project Name | TONARI |
 | Project Description | `earn_project_description` |
@@ -51,13 +51,13 @@ Status: **DRAFT / MEDIA AND TELEGRAM READY / NOT SUBMITTED**. Exact machine-read
 | Project Website | live product |
 | Project X Link | Blank |
 | Link to your pitch deck or Loom/video presentation | https://youtu.be/FS4sn8_zRHU |
-| Did you submit this project to the official Crypto World's Fair Hackathon on Colosseum? (Yes/No) | **Yes only after receipt exists** |
-| Link to Colosseum project | replace after project exists |
-| Link to your project's Colosseum profile | replace separately |
+| Did you submit this project to the official Crypto World's Fair Hackathon on Colosseum? (Yes/No) | **Yes** — receipt recorded 2026-10-07 00:17 JST |
+| Link to Colosseum project | https://colosseum.com/arena/projects/tonari |
+| Link to your project's Colosseum profile | https://colosseum.com/arena/profiles/inunanba |
 | Anything Else? | `earn_anything_else` |
 
-At owner submit time, both required Earn checkboxes must be reviewed and ticked: track scope, and Japan KYC acknowledgement. Profile completeness and Japan-region eligibility must pass. Earn submit remains owner-only.
+At owner submit time, both required Earn checkboxes were reviewed and ticked: track scope, and Japan KYC acknowledgement. Earn submit was owner-only; its receipt is now recorded and does not authorize a repeat.
 
 ## Paste gate
 
-Do not paste or submit until the logo is visually checked; all links work signed out; Colosseum is submitted before the Earn “Yes”; current schemas are rechecked; Work issues final GO; and the owner issues final OK. If asked about tools or contributors, use the explicit truthful answers in `form-schema.json`.
+Colosseum and Earn submissions are complete and must not be repeated. Preserve the receipt evidence and perform only independent public/readback checks. If asked later about tools or contributors, use the explicit truthful answers in `form-schema.json`.

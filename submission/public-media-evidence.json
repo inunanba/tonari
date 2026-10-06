@@ -1,6 +1,6 @@
 {
-  "verified_at": "2026-10-06T20:58:00+09:00",
-  "verification_mode": "signed-out fresh cloud browser",
+  "verified_at": "2026-10-07T00:18:00+09:00",
+  "verification_mode": "pitch signed-out; replacement demo owner-approved and used in Colosseum receipt; fresh signed-out recheck pending",
   "channel": "EpicForge Studio",
   "pitch": {
     "url": "https://youtu.be/FS4sn8_zRHU",
@@ -12,12 +12,18 @@
     "burned_in_english_subtitles": true
   },
   "demo": {
-    "url": "https://youtu.be/yHdKe_2xoMI",
-    "resolved_url": "https://www.youtube.com/watch?v=yHdKe_2xoMI",
-    "title": "TONARI – Technical Demo (offline swap, Solana Devnet)",
+    "url": "https://youtu.be/eZR5a1Bb414",
+    "resolved_url": "https://www.youtube.com/watch?v=eZR5a1Bb414",
+    "title": null,
     "visibility": "unlisted",
-    "duration_seconds": 114,
-    "local_sha256_prefix": "babcda22"
+    "duration_seconds": 124,
+    "local_sha256_prefix": null,
+    "signed_out_recheck": "PENDING"
   },
-  "submission_authorized": false
+  "submission_authorized": false,
+  "colosseum_submitted": true,
+  "earn_submitted": true,
+  "earn_submitted_at": "2026-10-07T00:35:00+09:00",
+  "earn_submission_receipt": "Submission Received!",
+  "earn_listing": "https://superteam.fun/earn/listing/superteam-japan-x-enxross-by-tokyo-dome-side-track/"
 }

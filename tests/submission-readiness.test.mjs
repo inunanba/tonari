@@ -5,15 +5,16 @@ import {assessSubmissionReadiness} from '../tools/check-submission-readiness.mjs
 
 const schema=JSON.parse(await readFile(new URL('../submission/form-schema.json',import.meta.url),'utf8'));
 
-test('submission readiness separates pre-submit gates from receipt evidence that cannot exist yet',()=>{
+test('submission readiness records both completed submissions without reopening authority',()=>{
   const result=assessSubmissionReadiness(schema);
   assert.equal(result.verdict,'READY_FOR_WORK_FINAL_REVIEW');
+  assert.equal(result.currentStage,'BOTH_SUBMITTED');
   assert.deepEqual(result.blockers,[]);
-  assert.deepEqual(result.postSubmissionEvidencePending,[
-    'colosseum_submission_receipt','colosseum_project','colosseum_profile','colosseum_receipt_confirmed'
-  ]);
-  assert.equal(result.ownerFinalOk,false);
+  assert.deepEqual(result.postSubmissionEvidencePending,[]);
+  assert.equal(result.ownerFinalOk,true);
   assert.equal(result.submissionAuthorized,false);
+  assert.equal(result.colosseumSubmitted,true);
+  assert.equal(result.earnSubmitted,true);
   assert.equal(result.cNFT,'NOT_VERIFIED');
   assert.equal(result.nonTransferability,'NOT_VERIFIED');
 });
@@ -21,7 +22,7 @@ test('submission readiness separates pre-submit gates from receipt evidence that
 test('owner-supplied media and Telegram values are wired exactly',()=>{
   assert.equal(schema.colosseum.telegram,'@hiyoko0329');
   assert.equal(schema.colosseum.pitch_video,'https://youtu.be/FS4sn8_zRHU');
-  assert.equal(schema.colosseum.demo_video,'https://youtu.be/yHdKe_2xoMI');
+  assert.equal(schema.colosseum.demo_video,'https://youtu.be/eZR5a1Bb414');
   assert.equal(schema.earn.pitch,schema.colosseum.pitch_video);
 });
 
@@ -39,7 +40,7 @@ test('complete evidence only advances to Work final review, never submission aut
   assert.equal(result.verdict,'READY_FOR_WORK_FINAL_REVIEW');
   assert.deepEqual(result.blockers,[]);
   assert.deepEqual(result.postSubmissionEvidencePending,[]);
-  assert.equal(result.ownerFinalOk,false);
+  assert.equal(result.ownerFinalOk,true);
   assert.equal(result.submissionAuthorized,false);
 });
 

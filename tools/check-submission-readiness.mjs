@@ -23,12 +23,18 @@ export function assessSubmissionReadiness(schema){
   needAfterSubmission('colosseum_project',e.colosseum_project,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
   needAfterSubmission('colosseum_profile',e.colosseum_profile,v=>typeof v==='string'&&HTTPS.test(v)&&!PLACEHOLDER.test(v));
   if(e.submitted_to_colosseum!=='Yes')postSubmissionEvidencePending.push('colosseum_receipt_confirmed');
+  const colosseumSubmitted=postSubmissionEvidencePending.length===0;
+  const ownerFinalOk=schema?.approvals?.owner_final_ok===true;
+  const earnSubmitted=schema?.approvals?.earn_submitted===true;
   return Object.freeze({
     verdict:blockers.length?'FULL_NO_GO':'READY_FOR_WORK_FINAL_REVIEW',
+    currentStage:colosseumSubmitted&&earnSubmitted?'BOTH_SUBMITTED':colosseumSubmitted?'COLOSSEUM_SUBMITTED_EARN_OWNER_SUBMIT_PENDING':'PRE_SUBMISSION_REVIEW',
     blockers:Object.freeze(blockers),
     postSubmissionEvidencePending:Object.freeze(postSubmissionEvidencePending),
-    ownerFinalOk:false,
+    ownerFinalOk,
     submissionAuthorized:false,
+    colosseumSubmitted,
+    earnSubmitted,
     cNFT:'NOT_VERIFIED',
     nonTransferability:'NOT_VERIFIED'
   });
